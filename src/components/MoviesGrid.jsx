@@ -6,6 +6,9 @@ import MovieCard from "./MovieCard";
 function MoviesGrid() {
     // State to hold the list of movies.
     const [movies, setMovies] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
+
 
     // Function to fetch movie data from an external JSON file.
     const fetchMovies = async () => {
@@ -22,13 +25,27 @@ function MoviesGrid() {
         fetchMovies();
     }, []);
 
+    const handleSearchTerm = (e) => {
+        setSearchTerm(e.target.value);
+    }
+
+    const filteredMovies = movies.filter((movie) =>
+        movie.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
     // Main content of the MoviesGrid component.
     return (
-        <div className="movies-grid">
-            {movies.map((movie) => (
-                <MovieCard movie={movie} key={movie.id}></MovieCard>
-            ))}
+        <div>
+            <input type="text" className="search-input"
+                   placeholder="Search movies..."
+                   value={searchTerm}
+                   onChange={handleSearchTerm} />
+            <div className="movies-grid">
+                {filteredMovies.map((movie) => (
+                    <MovieCard movie={movie} key={movie.id}></MovieCard>
+                ))}
+            </div>
         </div>
+
     );
 }
 
