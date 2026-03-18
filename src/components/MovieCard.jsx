@@ -1,7 +1,7 @@
 import React from 'react';
 import "../styles.css";
 
-function MovieCard({movie}) {
+function MovieCard({movie, isWatchlisted, toggleWatchlist}) {
 
     const handleError = (e) => {
         e.target.src = "images/default.jpg";

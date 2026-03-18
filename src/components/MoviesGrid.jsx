@@ -1,33 +1,14 @@
 import React from 'react';
-import {useState, useEffect} from "react";
-import movieCard from "./MovieCard";
+import {useState} from "react";
 import MovieCard from "./MovieCard";
 
-function MoviesGrid() {
-    // State to hold the list of movies.
-    const [movies, setMovies] = useState([]);
+function MoviesGrid({movies, toggleWatchlist, watchlist}) {
+
     const [searchTerm, setSearchTerm] = useState("");
 
     const [genre, setGenre] = useState("All Genres");
     const [rating, setRating] = useState("All");
 
-
-
-
-    // Function to fetch movie data from an external JSON file.
-    const fetchMovies = async () => {
-        try {
-            const response = await fetch('/movies.json');
-            const data = await response.json();
-            setMovies(data);
-        } catch (error) {
-            console.error("Error fetching movies:", error);
-        }
-    }
-
-    useEffect(() => {
-        fetchMovies();
-    }, []);
 
     const handleSearchTerm = (e) => {
         setSearchTerm(e.target.value);
@@ -97,7 +78,7 @@ function MoviesGrid() {
 
             <div className="movies-grid">
                 {filteredMovies.map((movie) => (
-                    <MovieCard movie={movie} key={movie.id}></MovieCard>
+                    <MovieCard movie={movie} toggleWatchlist={toggleWatchlist} isWatchlisted={watchlist.includes(movie.id)} key={movie.id}></MovieCard>
                 ))}
             </div>
         </div>
