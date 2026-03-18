@@ -59,7 +59,7 @@ function App() {
 
               <Routes>
                   <Route path="/" element={<MoviesGrid movies={movies} watchlist={watchlist} toggleWatchlist={toggleWatchlist}/>}/>
-                  <Route path="/watchlist" element={<Watchlist watchlist={watchlist} movies={movies} toggleWatchList={toggleWatchlist}  />}/>
+                  <Route path="/watchlist" element={<Watchlist movies={movies} watchlist={watchlist} toggleWatchList={toggleWatchlist}  />}/>
               </Routes>
 
           </Router>
