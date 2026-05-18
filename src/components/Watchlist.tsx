@@ -12,15 +12,18 @@
 
 import React from 'react';
 import MovieCard from './MovieCard';
+import WatchlistRecommendations from './WatchlistRecommendations';
 import { Movie } from '../types/movie';
+import '../styles/MoviesGrid.css';
 
 interface WatchlistProps {
   movies: Movie[];
   watchlist: number[];
   toggleWatchlist: (movieId: number) => void;
+  isWatchlisted: (movieId: number) => boolean;
 }
 
-function Watchlist({ movies, watchlist, toggleWatchlist }: WatchlistProps) {
+function Watchlist({ movies, watchlist, toggleWatchlist, isWatchlisted }: WatchlistProps) {
   // Find full Movie objects for each watchlist id.
   // The type guard (m): m is Movie filters out any undefined results
   // (can happen if movies haven't loaded yet when the component renders).
@@ -52,6 +55,12 @@ function Watchlist({ movies, watchlist, toggleWatchlist }: WatchlistProps) {
           />
         ))}
       </div>
+      <WatchlistRecommendations
+        watchlistMovies={watchlistMovies}
+        allMovies={movies}
+        isWatchlisted={isWatchlisted}
+        toggleWatchlist={toggleWatchlist}
+      />
     </div>
   );
 }
