@@ -1,0 +1,110 @@
+/* ── Full-page loading screen ───────────────────────────────── */
+.ls-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+  text-align: center;
+  gap: 1.2rem;
+}
+
+.ls-ring-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.ls-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: #FFA100;
+  border-right-color: rgba(255,161,0,0.25);
+  animation: spin 1.1s linear infinite;
+}
+
+.ls-ring-2 {
+  inset: 12px;
+  border-top-color: transparent;
+  border-bottom-color: #7b2ff7;
+  border-left-color: rgba(123,47,247,0.25);
+  animation: spin-reverse 1.6s linear infinite;
+}
+
+@keyframes spin         { to { transform: rotate(360deg); } }
+@keyframes spin-reverse { to { transform: rotate(-360deg); } }
+
+.ls-icon {
+  font-size: 2rem;
+  line-height: 1;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%       { transform: scale(1.15); opacity: 0.8; }
+}
+
+.ls-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.ls-dialogue-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: -0.4rem;
+}
+
+.ls-quote-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 500px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.ls-quote-in  { opacity: 1; transform: translateY(0); }
+.ls-quote-out { opacity: 0; transform: translateY(8px); }
+
+.ls-quote {
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.8);
+  font-style: italic;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.ls-quote-film {
+  font-size: 0.75rem;
+  color: #FFA100;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.ls-progress {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.04em;
+}
+
+/* Legacy fallback */
+.loading {
+  text-align: center;
+  padding: 4rem 1rem;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+}

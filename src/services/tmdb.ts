@@ -10,7 +10,7 @@
 // 3. Add to .env as REACT_APP_TMDB_API_KEY=your_key
 
 import axios from 'axios';
-import { Movie } from '../types/movie';
+import { Movie, CastMember } from '../types/movie';
 
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
@@ -138,15 +138,33 @@ export async function fetchAllPopularMovies(
   return allMovies;
 }
 
-// Get full detail for a single movie by its TMDB id
+// Get full detail for a single movie by its TMDB id (includes credits)
 export async function fetchMovieById(tmdbId: number): Promise<Movie> {
-  const [{ data }, genreMap] = await Promise.all([
-    axios.get(`${TMDB_BASE}/movie/${tmdbId}`, {
-      params: { api_key: API_KEY },
-    }),
+  const [{ data }, { data: credits }, { data: videos }, genreMap] = await Promise.all([
+    axios.get(`${TMDB_BASE}/movie/${tmdbId}`, { params: { api_key: API_KEY } }),
+    axios.get(`${TMDB_BASE}/movie/${tmdbId}/credits`, { params: { api_key: API_KEY } }),
+    axios.get(`${TMDB_BASE}/movie/${tmdbId}/videos`, { params: { api_key: API_KEY } }),
     fetchGenreMap(),
   ]);
-  // Full detail endpoint returns genres as objects, not IDs
   const genreIds = data.genres.map((g: TMDBGenre) => g.id);
-  return transformMovie({ ...data, genre_ids: genreIds }, genreMap);
+  const base = transformMovie({ ...data, genre_ids: genreIds }, genreMap);
+  const cast: CastMember[] = credits.cast
+    .slice(0, 15)
+    .map((c: { name: string; character: string; profile_path: string | null }) => ({
+      name: c.name,
+      character: c.character,
+      profilePath: c.profile_path ? `${TMDB_IMAGE_BASE}${c.profile_path}` : '',
+    }));
+  const trailer = (videos.results as { site: string; type: string; official: boolean; key: string }[])
+    .find(v => v.site === 'YouTube' && v.type === 'Trailer' && v.official)
+    ?? (videos.results as { site: string; type: string; key: string }[])
+      .find(v => v.site === 'YouTube' && v.type === 'Trailer');
+
+  return {
+    ...base,
+    runtime: data.runtime ?? 0,
+    director: credits.crew.find((c: { job: string; name: string }) => c.job === 'Director')?.name ?? '',
+    cast,
+    trailerKey: trailer?.key ?? '',
+  };
 }

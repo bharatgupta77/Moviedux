@@ -4,7 +4,7 @@
 // All data-fetching logic has moved to hooks/useMovies.ts and hooks/useWatchlist.ts
 
 import './App.css';
-import './styles.css';
+import './styles/global.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import MoviesGrid from './components/MoviesGrid';
@@ -69,6 +69,7 @@ function App() {
                   movies={movies}
                   watchlist={watchlist}
                   toggleWatchlist={toggleWatchlist}
+                  isWatchlisted={isWatchlisted}
                 />
               }
             />

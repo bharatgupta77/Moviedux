@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import '../styles/LoadingScreen.css';
 
 const ALL_QUOTES = [
   // Hollywood

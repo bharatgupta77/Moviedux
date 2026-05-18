@@ -1,21 +1,11 @@
-// MovieDetail.tsx — NEW in Phase 1
-//
-// A dedicated page for a single movie, accessible at /movies/:id
-// This page is the anchor point for Phase 3 AI features:
-//   - "Similar Movies" panel (TF-IDF recommendations)
-//   - "Why recommended?" streaming explanation (Claude API)
-//
-// HOW useParams works:
-// React Router extracts the :id segment from the URL and gives it to us
-// via useParams(). If the user visits /movies/550, id will be "550" (string).
-// We convert it to a number with Number(id) to match movie.id.
-//
-// HOW useNavigate works:
-// navigate(-1) goes back one step in browser history — like the browser Back button.
-
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { Movie } from '../types/movie';
+import { useMovieDetail } from '../hooks/useMovieDetail';
+import StarRating from './StarRating';
+import MovieDNA from './MovieDNA';
+import CastCard from './CastCard';
+import RecommendationsPanel from './RecommendationsPanel';
+import '../styles/MovieDetail.css';
 
 interface MovieDetailProps {
   movies: Movie[];
@@ -23,75 +13,112 @@ interface MovieDetailProps {
   toggleWatchlist: (movieId: number) => void;
 }
 
-function getRatingClass(rating: number): string {
-  if (rating >= 8) return 'rating-good';
-  if (rating >= 5) return 'rating-ok';
-  return 'rating-bad';
+function formatRuntime(mins: number): string {
+  if (!mins) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
 function MovieDetail({ movies, isWatchlisted, toggleWatchlist }: MovieDetailProps) {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const {
+    movie, navigate, watchlisted, genres, cast, visibleCast,
+    castIndex, prevCast, nextCast, canGoPrev, canGoNext, notFound,
+  } = useMovieDetail(movies, isWatchlisted);
 
-  const movie = movies.find((m) => m.id === Number(id));
-
-  if (!movie) {
+  if (notFound || !movie) {
     return (
-      <div className="movie-detail">
-        <button onClick={() => navigate(-1)} className="back-btn">← Back</button>
+      <div className="md-wrap">
+        <button onClick={() => navigate(-1)} className="md-back-btn">← Back</button>
         <p className="empty-state">Movie not found. It may still be loading.</p>
       </div>
     );
   }
 
-  const watchlisted = isWatchlisted(movie.id);
-
   return (
-    <div className="movie-detail">
-      <button onClick={() => navigate(-1)} className="back-btn">← Back</button>
+    <div className="md-wrap">
+      <div className="md-hero">
+        {movie.posterPath && (
+          <div className="md-hero-bg" style={{ backgroundImage: `url(${movie.posterPath})` }} />
+        )}
+        <div className="md-hero-overlay" />
 
-      <div className="movie-detail-content">
-        <img
-          src={movie.posterPath || 'images/default.jpg'}
-          alt={movie.title}
-          className="movie-detail-poster"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'images/default.jpg';
-          }}
-        />
+        <button onClick={() => navigate(-1)} className="md-back-btn">← Back</button>
 
-        <div className="movie-detail-info">
-          <h1>{movie.title}</h1>
+        <div className="md-hero-content">
+          <img
+            src={movie.posterPath || 'images/default.jpg'}
+            alt={movie.title}
+            className="md-poster"
+            onError={(e) => { (e.target as HTMLImageElement).src = 'images/default.jpg'; }}
+          />
 
-          <div className="movie-detail-meta">
-            <span className="movie-card-genre">{movie.genre}</span>
-            <span className={`movie-card-rating ${getRatingClass(movie.rating)}`}>
-              ★ {movie.rating} / 10
-            </span>
-            {movie.releaseYear > 0 && (
-              <span className="movie-detail-year">{movie.releaseYear}</span>
-            )}
+          <div className="md-info">
+            <h1 className="md-title">{movie.title}</h1>
+            <div className="md-info-body">
+              <div className="md-info-left">
+                <div className="md-tags">
+                  {movie.releaseYear > 0 && (
+                    <span className="md-tag md-tag-year">{movie.releaseYear}</span>
+                  )}
+                  {genres.map(g => (
+                    <span key={g} className="md-tag">{g}</span>
+                  ))}
+                </div>
+                <StarRating rating={movie.rating} />
+                <div className="md-meta-row">
+                  {movie.runtime ? <span className="md-meta-item">⏱ {formatRuntime(movie.runtime)}</span> : null}
+                  {movie.director ? <span className="md-meta-item">🎬 {movie.director}</span> : null}
+                </div>
+                <p className="md-overview">{movie.overview}</p>
+                <div className="md-cta-row">
+                  <button
+                    className={`md-watchlist-btn ${watchlisted ? 'md-watchlist-btn-active' : ''}`}
+                    onClick={() => toggleWatchlist(movie.id)}
+                  >
+                    {watchlisted ? '✓ In Watchlist' : '+ Add to Watchlist'}
+                  </button>
+                  {movie.trailerKey && (
+                    <a
+                      href={`https://www.youtube.com/watch?v=${movie.trailerKey}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="md-trailer-btn"
+                    >
+                      ▶ Watch Trailer
+                    </a>
+                  )}
+                </div>
+
+                {cast.length > 0 && (
+                  <div className="md-cast-bar">
+                    <div className="md-cast-bar-header">
+                      <span className="md-cast-heading">Cast</span>
+                      <div className="md-cast-nav">
+                        <button className="md-cast-nav-btn" onClick={prevCast} disabled={!canGoPrev}>‹</button>
+                        <button className="md-cast-nav-btn" onClick={nextCast} disabled={!canGoNext}>›</button>
+                      </div>
+                    </div>
+                    <div className="md-cast-track">
+                      {visibleCast.map(member => (
+                        <CastCard key={member.name} member={member} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <MovieDNA movie={movie} />
+            </div>
           </div>
-
-          <p className="movie-detail-overview">{movie.overview}</p>
-
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={watchlisted}
-              onChange={() => toggleWatchlist(movie.id)}
-            />
-            <span className="slider">
-              <span className="slider-label">
-                {watchlisted ? 'In Watchlist' : 'Add to Watchlist'}
-              </span>
-            </span>
-          </label>
-
-          {/* Phase 3: AI Recommendations panel will be added here */}
-          {/* <RecommendationsPanel movieId={movie.id} /> */}
         </div>
       </div>
+
+      <RecommendationsPanel
+        movie={movie}
+        allMovies={movies}
+        isWatchlisted={isWatchlisted}
+        toggleWatchlist={toggleWatchlist}
+      />
     </div>
   );
 }

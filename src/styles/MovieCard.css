@@ -1,0 +1,203 @@
+/* ── Movie Card ─────────────────────────────────────────────── */
+.movie-card {
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+}
+
+.movie-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.65);
+}
+
+.movie-card-poster-link {
+  display: block;
+  text-decoration: none;
+}
+
+.movie-card-poster {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #111;
+}
+
+.movie-card-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.movie-card:hover .movie-card-poster img {
+  transform: scale(1.06);
+}
+
+/* Rating badge on top-right of poster */
+.poster-rating-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+  border-radius: 50px;
+  padding: 3px 9px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  z-index: 2;
+}
+
+/* Hover overlay — slides up from bottom */
+.poster-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.92) 60%, rgba(0,0,0,0.1));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 3;
+}
+
+.movie-card:hover .poster-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.poster-overview {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.88);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.poster-view-more {
+  font-size: 0.75rem;
+  color: #FFA100;
+  font-weight: 600;
+}
+
+/* Card info section */
+.movie-card-info {
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.movie-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.movie-card-title a:hover {
+  color: #FFA100;
+}
+
+.movie-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.movie-card-genre {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+}
+
+.movie-card-year {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+}
+
+.movie-card-rating {
+  font-size: 0.85rem;
+  font-weight: bold;
+  background: #141414;
+  padding: 3px 10px;
+  border-radius: 50px;
+}
+
+/* Watchlist toggle switch */
+.watchlist-btn {
+  border: none;
+  background: #2196F3;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.switch {
+  margin: 20px auto;
+  position: relative;
+  display: inline-block;
+  width: 150px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #141414;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.slider-label {
+  color: #fff;
+  font-size: 12px;
+  width: 100%;
+  line-height: 24px;
+  transition: opacity 0.4s ease;
+}
+
+input:checked + .slider:before {
+  transform: translateX(125px);
+}
+
+input:checked + .slider {
+  background-color: #FFA100;
+}
