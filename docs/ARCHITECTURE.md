@@ -20,28 +20,43 @@
 ```
 src/
 ├── types/
-│   └── movie.ts              ← Movie interface — single source of truth for data shape
+│   └── movie.ts                    ← Movie interface — single source of truth for data shape
 │
 ├── services/
-│   └── tmdb.ts               ← All TMDB API calls + data transformation (genre IDs → names)
+│   ├── tmdb.ts                     ← TMDB API calls + data transformation (genre IDs → names)
+│   └── api.ts                      ← Flask backend calls (similar movies, watchlist recs)
 │
 ├── hooks/
-│   ├── useMovies.ts          ← Fetches all TMDB pages, manages loading/error state
-│   └── useWatchlist.ts       ← Watchlist state with localStorage persistence
+│   ├── useMovies.ts                ← Fetches all TMDB pages, manages loading/error state
+│   ├── useWatchlist.ts             ← Watchlist state with localStorage persistence
+│   ├── useMoviesGrid.ts            ← Filter state, pagination, derived values for MoviesGrid
+│   └── useMovieDetail.ts           ← Fetch + carousel state for MovieDetail
 │
 ├── components/
-│   ├── Header.tsx            ← Logo + subtitle (presentational)
-│   ├── Footer.tsx            ← Copyright (presentational)
-│   ├── MovieCard.tsx         ← Single movie card with hover overlay + rating badge
-│   ├── MoviesGrid.tsx        ← Search + filter + pagination grid
-│   ├── Watchlist.tsx         ← Watchlist page
-│   ├── MovieDetail.tsx       ← /movies/:id page (Phase 3 AI panel anchor)
-│   └── LoadingScreen.tsx     ← Animated loader with rotating movie dialogues
+│   ├── Header.tsx                  ← Logo + subtitle (presentational)
+│   ├── Footer.tsx                  ← Copyright (presentational)
+│   ├── MovieCard.tsx               ← Single movie card with hover overlay + rating badge
+│   ├── MoviesGrid.tsx              ← Search + filter + pagination grid (pure JSX)
+│   ├── Watchlist.tsx               ← Watchlist page
+│   ├── MovieDetail.tsx             ← /movies/:id page layout (pure JSX)
+│   ├── StarRating.tsx              ← Star display + rating colour helper
+│   ├── MovieDNA.tsx                ← DNA card (audience score, buzz, intensity, pacing)
+│   ├── CastCard.tsx                ← Cast avatar with shimmer skeleton
+│   ├── LoadingScreen.tsx           ← Animated loader with rotating movie dialogues
+│   ├── RecommendationsPanel.tsx    ← "More Like This" on detail page (TF-IDF)
+│   └── WatchlistRecommendations.tsx← "Recommended For You" on watchlist page (TF-IDF)
 │
-├── App.tsx                   ← Thin shell: calls hooks, wires routes
-├── styles.css                ← All styles (aurora, cards, pagination, nav, loader)
-├── declarations.d.ts         ← Tells TypeScript that .css/.svg imports are valid
-└── react-app-env.d.ts        ← CRA TypeScript reference
+├── styles/
+│   ├── global.css                  ← Reset, aurora, nav, header, footer, error/empty states
+│   ├── MovieCard.css
+│   ├── MoviesGrid.css              ← Search bar, filters, grid, pagination
+│   ├── MovieDetail.css             ← All md-* classes, star rating, DNA, cast
+│   ├── LoadingScreen.css
+│   └── Recommendations.css         ← All rp-* classes (shared by both panels)
+│
+├── App.tsx                         ← Thin shell: calls hooks, wires routes
+├── declarations.d.ts               ← Tells TypeScript that .css/.svg imports are valid
+└── react-app-env.d.ts              ← CRA TypeScript reference
 ```
 
 ## Backend File Map (Phase 2+)
@@ -97,9 +112,13 @@ Browser
 | Decision | Why |
 |----------|-----|
 | Custom hooks over logic in App.tsx | Separation of concerns — App only wires routes |
-| Service file for TMDB calls | Single place to change if backend replaces TMDB |
+| Logic extracted into `useMoviesGrid` / `useMovieDetail` | `.tsx` files are pure JSX; all state + effects live in hooks |
+| Sub-components extracted from MovieDetail | `StarRating`, `MovieDNA`, `CastCard` each in their own file — easier to find and reuse |
+| CSS split into `src/styles/` per component | 1349-line monolith → 6 focused files; edit MovieCard styles without scrolling past DNA styles |
+| Service file for TMDB calls | Single place to change if backend replaces TMDB direct calls |
 | `useMemo` for filter/genre derivation | Avoids recalculating on every keystroke |
 | `localStorage` for watchlist | Persistence without a backend in Phase 1 |
+| Remap backend rec IDs to internal IDs | Backend returns TMDB IDs; watchlist stores internal IDs — remap via `allMovies.find(m => m.tmdbId === r.id)` to keep them in sync |
 | Fisher-Yates shuffle in LoadingScreen | True randomness without bias toward early items |
 | `NavLink` over `Link` for nav | Built-in active state detection per route |
 | Aurora in CSS only | Zero JS overhead, pure `@keyframes` |
