@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from .routes.movies import movies_bp
 from .routes.recommendations import recs_bp
+from .routes.chat import chat_bp
 
 
 def create_app():
@@ -24,5 +25,6 @@ def create_app():
 
     app.register_blueprint(movies_bp, url_prefix="/api/movies")
     app.register_blueprint(recs_bp,   url_prefix="/api/recommendations")
+    app.register_blueprint(chat_bp,   url_prefix="/api/chat")
 
     return app
