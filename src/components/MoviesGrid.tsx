@@ -16,9 +16,9 @@ interface MoviesGridProps {
 function MoviesGrid({ movies, loading, loadingProgress, watchlist, toggleWatchlist }: MoviesGridProps) {
   const {
     searchTerm, setSearchTerm,
-    genre, setGenre,
+    genre, changeGenre,
     rating, setRating,
-    mood, setMood,
+    mood, changeMood,
     genres,
     filteredMovies,
     pageMovies,
@@ -45,7 +45,7 @@ function MoviesGrid({ movies, loading, loadingProgress, watchlist, toggleWatchli
       <div className="filter-bar">
         <div className="filter-slot">
           <label>Genre</label>
-          <select className="filter-dropdown" value={genre} onChange={(e) => setGenre(e.target.value)}>
+          <select className="filter-dropdown" value={genre} onChange={(e) => changeGenre(e.target.value)}>
             {genres.map((g) => <option key={g} value={g}>{g}</option>)}
           </select>
         </div>
@@ -58,13 +58,20 @@ function MoviesGrid({ movies, loading, loadingProgress, watchlist, toggleWatchli
             <option value="Bad">Bad (&lt;5)</option>
           </select>
         </div>
-        <div className="filter-slot">
-          <label>Mood</label>
-          <select className="filter-dropdown" value={mood} onChange={(e) => setMood(e.target.value as Mood)}>
-            {(Object.keys(MOOD_MAP) as Mood[]).map(m => (
-              <option key={m} value={m}>{MOOD_EMOJI[m]} {m}</option>
-            ))}
-          </select>
+      </div>
+
+      <div className="mood-pill-section">
+        <span className="mood-label">Mood</span>
+        <div className="mood-pill-row">
+          {(Object.keys(MOOD_MAP) as Mood[]).filter(m => m !== 'Any').map(m => (
+            <button
+              key={m}
+              className={`mood-pill${mood === m ? ' mood-pill-active' : ''}`}
+              onClick={() => changeMood(mood === m ? 'Any' : m)}
+            >
+              {MOOD_EMOJI[m]} {m}
+            </button>
+          ))}
         </div>
       </div>
 

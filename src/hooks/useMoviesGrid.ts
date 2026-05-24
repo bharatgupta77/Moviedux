@@ -41,21 +41,35 @@ export function useMoviesGrid(movies: Movie[]) {
     return ['All Genres', ...Array.from(new Set(all)).sort()];
   }, [movies]);
 
-  const filteredMovies = useMemo(() =>
-    movies.filter((m) =>
-      (genre === 'All Genres' || m.genre.toLowerCase().includes(genre.toLowerCase())) &&
-      matchesRating(m.rating, rating) &&
-      m.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (mood === 'Any' || MOOD_MAP[mood].some(g => m.genre.toLowerCase().includes(g.toLowerCase())))
-    ),
-    [movies, genre, rating, searchTerm, mood]
-  );
+  const filteredMovies = useMemo(() => {
+    const seen = new Set<number>();
+    return movies.filter((m) => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return (
+        (genre === 'All Genres' || m.genre.toLowerCase().includes(genre.toLowerCase())) &&
+        matchesRating(m.rating, rating) &&
+        m.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (mood === 'Any' || MOOD_MAP[mood].some(g => m.genre.toLowerCase().includes(g.toLowerCase())))
+      );
+    });
+  }, [movies, genre, rating, searchTerm, mood]);
 
   const totalPages = Math.ceil(filteredMovies.length / MOVIES_PER_PAGE);
   const pageMovies = filteredMovies.slice(
     (currentPage - 1) * MOVIES_PER_PAGE,
     currentPage * MOVIES_PER_PAGE
   );
+
+  const changeMood = (newMood: Mood) => {
+    setMood(newMood);
+    if (newMood !== 'Any') setGenre('All Genres');
+  };
+
+  const changeGenre = (newGenre: string) => {
+    setGenre(newGenre);
+    if (newGenre !== 'All Genres') setMood('Any');
+  };
 
   const goTo = (page: number) => {
     setCurrentPage(page);
@@ -64,9 +78,9 @@ export function useMoviesGrid(movies: Movie[]) {
 
   return {
     searchTerm, setSearchTerm,
-    genre, setGenre,
+    genre, changeGenre,
     rating, setRating,
-    mood, setMood,
+    mood, changeMood,
     genres,
     filteredMovies,
     pageMovies,

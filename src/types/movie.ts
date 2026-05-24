@@ -31,15 +31,15 @@ export type RatingFilter = 'All' | 'Good' | 'Ok' | 'Bad';
 export type Mood = 'Any' | 'Happy' | 'Emotional' | 'Scary' | 'Action-packed' | 'Romantic' | 'Mind-bending' | 'Chill' | 'Epic';
 
 export const MOOD_MAP: Record<Mood, string[]> = {
-  'Any':          [],
-  'Happy':        ['Comedy', 'Animation', 'Family'],
-  'Emotional':    ['Drama', 'Romance'],
-  'Scary':        ['Horror', 'Thriller'],
-  'Action-packed':['Action', 'Adventure'],
-  'Romantic':     ['Romance', 'Drama'],
-  'Mind-bending': ['Science Fiction', 'Mystery', 'Thriller'],
-  'Chill':        ['Documentary', 'Music', 'Comedy'],
-  'Epic':         ['Fantasy', 'Adventure', 'History', 'War'],
+  'Any':           [],
+  'Happy':         ['Comedy', 'Animation', 'Family', 'Music'],
+  'Emotional':     ['Drama', 'Romance'],
+  'Scary':         ['Horror', 'Thriller'],
+  'Action-packed': ['Action', 'Adventure'],
+  'Romantic':      ['Romance'],
+  'Mind-bending':  ['Science Fiction', 'Mystery', 'Thriller'],
+  'Chill':         ['Documentary', 'Music', 'Comedy', 'Animation'],
+  'Epic':          ['Fantasy', 'Adventure', 'History', 'War'],
 };
 
 export const MOOD_EMOJI: Record<Mood, string> = {
