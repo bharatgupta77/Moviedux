@@ -57,7 +57,6 @@ function Watchlist({ movies, watchlist, toggleWatchlist, isWatchlisted }: Watchl
       </div>
       <WatchlistRecommendations
         watchlistMovies={watchlistMovies}
-        allMovies={movies}
         isWatchlisted={isWatchlisted}
         toggleWatchlist={toggleWatchlist}
       />
