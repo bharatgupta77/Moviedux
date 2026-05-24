@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Movie } from '../types/movie';
+import RatingStars from './RatingStars';
 import '../styles/MovieCard.css';
 
 interface MovieCardProps {
@@ -39,10 +40,11 @@ function MovieCard({ movie, isWatchlisted, toggleWatchlist }: MovieCardProps) {
             ★ {movie.rating}
           </span>
 
-          {/* Hover overlay: slides up with overview text */}
+          {/* Hover overlay: slides up with overview text + star rating */}
           {shortOverview && (
             <div className="poster-overlay">
               <p className="poster-overview">{shortOverview}</p>
+              <RatingStars movieId={movie.id} />
               <span className="poster-view-more">View details →</span>
             </div>
           )}
@@ -56,7 +58,7 @@ function MovieCard({ movie, isWatchlisted, toggleWatchlist }: MovieCardProps) {
         </h3>
 
         <div className="movie-card-meta">
-          <span className="movie-card-genre">{movie.genre}</span>
+          <span className="movie-card-genre">{movie.genre.split(', ').slice(0, 2).join(', ')}</span>
           {movie.releaseYear > 0 && (
             <span className="movie-card-year">{movie.releaseYear}</span>
           )}

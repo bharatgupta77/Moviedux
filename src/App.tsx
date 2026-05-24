@@ -3,6 +3,7 @@
 // 2. Wires up routes
 // All data-fetching logic has moved to hooks/useMovies.ts and hooks/useWatchlist.ts
 
+import React, { useState } from 'react';
 import './App.css';
 import './styles/global.css';
 import Header from './components/Header';
@@ -10,13 +11,16 @@ import Footer from './components/Footer';
 import MoviesGrid from './components/MoviesGrid';
 import Watchlist from './components/Watchlist';
 import MovieDetail from './components/MovieDetail';
+import ChatPanel from './components/ChatPanel';
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { useMovies } from './hooks/useMovies';
 import { useWatchlist } from './hooks/useWatchlist';
+import { UserProvider } from './context/UserContext';
 
-function App() {
+function AppInner() {
   const { movies, loading, loadingProgress, error } = useMovies();
   const { watchlist, toggleWatchlist, isWatchlisted } = useWatchlist();
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <div className="App">
@@ -84,11 +88,25 @@ function App() {
               }
             />
           </Routes>
+
+          {/* Chat FAB + panel live inside Router so useNavigate works */}
+          <button className="chat-fab" onClick={() => setChatOpen(true)}>
+            <span className="fab-icon">✨</span> Ask AI
+          </button>
+          <ChatPanel open={chatOpen} onClose={() => setChatOpen(false)} />
         </Router>
       </div>
 
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <UserProvider>
+      <AppInner />
+    </UserProvider>
   );
 }
 
