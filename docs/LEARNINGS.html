@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MovieDux — Things I Learned</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f13;
+      color: #e0e0e0;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .page { max-width: 860px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .page-header { margin-bottom: 3rem; border-bottom: 1px solid #2a2a35; padding-bottom: 1.5rem; }
+    .page-header h1 { font-size: 2rem; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+    .page-header h1 span { color: #f97316; }
+    .page-header p { margin-top: 0.5rem; color: #888; font-size: 0.95rem; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 3.5rem; }
+    .section-label {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: #f97316; margin-bottom: 0.5rem;
+    }
+    .section h2 { font-size: 1.6rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+    .section > p { color: #aaa; margin-bottom: 1.2rem; max-width: 720px; }
+
+    /* ── Concept Cards ── */
+    .concept-card {
+      background: #16161e; border: 1px solid #2a2a35;
+      border-radius: 12px; padding: 1.5rem 1.75rem; margin-bottom: 1.25rem;
+    }
+    .concept-card h3 {
+      font-size: 1.1rem; font-weight: 700; color: #fff;
+      margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .concept-card h3 .badge {
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 99px;
+      background: #1e2a1a; color: #4ade80; border: 1px solid #2d4a25;
+    }
+    .concept-card h3 .badge.phase3 {
+      background: #1e1a2a; color: #a78bfa; border-color: #3a2d5a;
+    }
+    .concept-card p { color: #999; font-size: 0.95rem; margin-bottom: 0.75rem; }
+
+    /* ── Compare Grid ── */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+
+    .compare-card { background: #16161e; border: 1px solid #2a2a35; border-radius: 12px; padding: 1.25rem 1.5rem; }
+    .compare-card.tfidf { border-top: 3px solid #38bdf8; }
+    .compare-card.svd   { border-top: 3px solid #a78bfa; }
+    .compare-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .compare-card.tfidf h4 { color: #38bdf8; }
+    .compare-card.svd h4   { color: #a78bfa; }
+    .compare-card ul { list-style: none; padding: 0; }
+    .compare-card ul li {
+      font-size: 0.9rem; color: #999; padding: 0.3rem 0;
+      border-bottom: 1px solid #1e1e28; display: flex; gap: 0.5rem;
+    }
+    .compare-card ul li:last-child { border-bottom: none; }
+    .compare-card ul li .label { color: #555; font-size: 0.8rem; min-width: 80px; padding-top: 1px; }
+
+    /* ── Example Box ── */
+    .example-box {
+      background: #0d1117; border: 1px solid #2a2a35; border-left: 3px solid #f97316;
+      border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1rem 0;
+    }
+    .example-box .example-title {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #f97316; margin-bottom: 0.75rem;
+    }
+    .example-box p { font-size: 0.92rem; color: #bbb; margin-bottom: 0.5rem; }
+    .example-box p:last-child { margin-bottom: 0; }
+
+    .highlight { color: #fff; font-weight: 600; }
+    .hl-blue   { color: #38bdf8; font-weight: 600; }
+    .hl-purple { color: #a78bfa; font-weight: 600; }
+    .hl-orange { color: #f97316; font-weight: 600; }
+    .hl-green  { color: #4ade80; font-weight: 600; }
+
+    /* ── Ratings Table ── */
+    .ratings-table-wrap { overflow-x: auto; margin: 1rem 0; }
+    .ratings-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .ratings-table th {
+      background: #1a1a24; color: #888; font-weight: 600;
+      padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid #2a2a35;
+    }
+    .ratings-table td { padding: 0.55rem 1rem; border-bottom: 1px solid #1e1e28; color: #bbb; }
+    .ratings-table tr:last-child td { border-bottom: none; }
+    .ratings-table .rated   { color: #4ade80; font-weight: 700; }
+    .ratings-table .missing { color: #555; font-style: italic; }
+    .ratings-table .predict { color: #f97316; font-weight: 700; }
+
+    /* ── Where Used ── */
+    .where-used { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.75rem; }
+    .where-tag {
+      font-size: 0.8rem; padding: 4px 12px; border-radius: 99px; border: 1px solid;
+    }
+    .where-tag.tfidf { background: #0a1e2a; color: #38bdf8; border-color: #1a4a6a; }
+    .where-tag.svd   { background: #1a0a2a; color: #a78bfa; border-color: #4a1a6a; }
+
+    /* ── Key Insight ── */
+    .insight {
+      background: #141420; border: 1px solid #2a2a45; border-radius: 10px;
+      padding: 1.25rem 1.5rem; margin-top: 1.5rem; display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .insight .icon { font-size: 1.4rem; margin-top: 2px; flex-shrink: 0; }
+    .insight p { font-size: 0.93rem; color: #aaa; margin: 0; }
+    .insight p strong { color: #fff; }
+
+    /* ═══════════════════════════════════════════
+       INTERACTIVE DEMO STYLES
+    ═══════════════════════════════════════════ */
+
+    .demo-block {
+      background: #111118;
+      border: 1px dashed #2e2e40;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin: 1.25rem 0 2rem;
+    }
+
+    .demo-label {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #f97316; margin-bottom: 1.25rem;
+    }
+
+    .demo-label::before {
+      content: '';
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: #f97316;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* ── TF-IDF Demo ── */
+    .tfidf-selectors {
+      display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+
+    .movie-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    .movie-pill {
+      padding: 5px 14px; border-radius: 99px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1px solid #2a2a35; background: #1a1a24; color: #888;
+      transition: all 0.2s;
+    }
+    .movie-pill:hover { border-color: #38bdf8; color: #38bdf8; }
+    .movie-pill.active { background: #0a2030; border-color: #38bdf8; color: #38bdf8; }
+    .movie-pill.active-b { background: #2a0a2a; border-color: #a78bfa; color: #a78bfa; }
+
+    .tfidf-columns {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;
+    }
+    @media (max-width: 560px) { .tfidf-columns { grid-template-columns: 1fr; } }
+
+    .tfidf-col-title {
+      font-size: 0.8rem; font-weight: 700; margin-bottom: 0.75rem;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .tfidf-col-title.a { color: #38bdf8; }
+    .tfidf-col-title.b { color: #a78bfa; }
+
+    .keyword-row {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.5rem; font-size: 0.85rem;
+    }
+
+    .keyword-word {
+      width: 100px; color: #ccc; flex-shrink: 0; font-size: 0.82rem;
+    }
+    .keyword-word.shared-a { color: #38bdf8; font-weight: 700; }
+    .keyword-word.shared-b { color: #a78bfa; font-weight: 700; }
+
+    .keyword-bar-wrap {
+      flex: 1; background: #1a1a24; border-radius: 99px;
+      height: 8px; overflow: hidden;
+    }
+
+    .keyword-bar {
+      height: 100%; border-radius: 99px;
+      background: #2a2a35;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+      width: 0;
+    }
+    .keyword-bar.col-a         { background: #1e4a6a; }
+    .keyword-bar.col-a.shared  { background: #38bdf8; }
+    .keyword-bar.col-b         { background: #3a1e5a; }
+    .keyword-bar.col-b.shared  { background: #a78bfa; }
+
+    .keyword-weight {
+      width: 32px; text-align: right; font-size: 0.78rem;
+      color: #555; flex-shrink: 0;
+    }
+
+    .similarity-result {
+      display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+      background: #16161e; border: 1px solid #2a2a35;
+      border-radius: 10px; padding: 1rem 1.25rem;
+    }
+
+    .sim-score-wrap { display: flex; align-items: center; gap: 0.75rem; }
+
+    .sim-score-ring {
+      width: 72px; height: 72px; flex-shrink: 0;
+    }
+
+    .sim-score-ring circle {
+      fill: none; stroke-width: 6; stroke-linecap: round;
+    }
+
+    .sim-ring-bg   { stroke: #1e1e28; }
+    .sim-ring-fill { stroke: #f97316; stroke-dasharray: 188; transition: stroke-dashoffset 0.6s ease; }
+
+    .sim-score-num {
+      font-size: 1.8rem; font-weight: 800; color: #fff;
+    }
+
+    .sim-label { font-size: 0.8rem; color: #888; }
+
+    .sim-shared {
+      flex: 1;
+    }
+    .sim-shared-title { font-size: 0.75rem; color: #888; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 1px; }
+    .sim-shared-tags  { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .sim-shared-tag {
+      font-size: 0.78rem; padding: 2px 10px; border-radius: 99px;
+      background: #1a1a28; border: 1px solid #38bdf8; color: #38bdf8;
+    }
+    .sim-shared-tag.purple { border-color: #a78bfa; color: #a78bfa; background: #1a1a28; }
+    .no-shared { color: #555; font-size: 0.85rem; font-style: italic; }
+
+    /* ── SVD Demo ── */
+    .svd-table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+
+    .svd-table {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      font-size: 0.88rem; min-width: 480px;
+    }
+
+    .svd-table th {
+      background: #1a1a24; color: #666; font-weight: 600;
+      padding: 0.6rem 0.75rem; text-align: center; border-bottom: 1px solid #2a2a35;
+      font-size: 0.8rem;
+    }
+
+    .svd-table th:first-child { text-align: left; }
+
+    .svd-table td {
+      padding: 0.55rem 0.75rem; border-bottom: 1px solid #1e1e28;
+      text-align: center; transition: background 0.3s;
+    }
+
+    .svd-table td:first-child { text-align: left; font-weight: 600; color: #ccc; }
+
+    .svd-table .you-row td { background: #141422; }
+    .svd-table .you-row td:first-child { color: #f97316; }
+
+    .svd-table .similar-row td { background: #13131d; }
+
+    /* Stars in SVD table */
+    .svd-stars { display: inline-flex; gap: 1px; cursor: pointer; }
+    .svd-star {
+      font-size: 1.1rem; color: #2a2a35;
+      transition: color 0.15s, transform 0.1s;
+    }
+    .svd-star.filled { color: #f97316; }
+    .svd-star.preview { color: #7a3a10; }
+    .svd-star:hover { transform: scale(1.2); }
+
+    .svd-predict-cell {
+      font-size: 1rem; font-weight: 700;
+      transition: all 0.4s;
+    }
+
+    .svd-predict-stars { display: inline-flex; gap: 1px; }
+    .svd-predict-star { font-size: 1.1rem; color: #2a2a35; transition: color 0.4s; }
+    .svd-predict-star.filled { color: #f97316; }
+    .svd-predict-star.half   { color: #7a3a10; }
+
+    .svd-sim-cell {
+      font-size: 0.8rem; font-weight: 700; padding: 0.4rem 0.75rem !important;
+    }
+
+    .svd-sim-bar-wrap {
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .svd-sim-mini {
+      width: 60px; height: 5px; background: #1e1e28;
+      border-radius: 99px; overflow: hidden; flex-shrink: 0;
+    }
+
+    .svd-sim-mini-fill {
+      height: 100%; border-radius: 99px; background: #a78bfa;
+      transition: width 0.4s ease;
+    }
+
+    .svd-sim-pct { color: #a78bfa; min-width: 34px; text-align: right; }
+
+    .svd-prediction-box {
+      background: #16161e; border: 1px solid #2a2a35; border-radius: 10px;
+      padding: 1rem 1.25rem; display: flex; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+    }
+
+    .svd-pred-label { font-size: 0.8rem; color: #888; }
+    .svd-pred-number {
+      font-size: 2rem; font-weight: 800; color: #f97316;
+      min-width: 50px; transition: all 0.4s;
+    }
+    .svd-pred-desc { font-size: 0.85rem; color: #666; max-width: 400px; line-height: 1.5; }
+    .svd-pred-desc strong { color: #a78bfa; }
+
+    .svd-hint { font-size: 0.78rem; color: #555; font-style: italic; margin-top: 0.75rem; }
+
+    /* ── Footer ── */
+    .page-footer {
+      margin-top: 4rem; padding-top: 1.5rem;
+      border-top: 1px solid #1e1e28; color: #444; font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <header class="page-header">
+      <h1>MovieDux — <span>Things I Learned</span></h1>
+      <p>Concepts picked up while building this project, explained in plain English with real examples from the code.</p>
+    </header>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  SECTION 1 — TF-IDF vs SVD                 -->
+    <!-- ═══════════════════════════════════════════ -->
+    <section class="section">
+      <span class="section-label">Recommendation Systems</span>
+      <h2>TF-IDF vs SVD — Two Ways to Recommend Movies</h2>
+      <p>Both are recommendation algorithms but they answer completely different questions.
+         MovieDux uses both, side by side, on the Watchlist page.</p>
+
+      <!-- TF-IDF Concept Card -->
+      <div class="concept-card">
+        <h3>TF-IDF &nbsp;<span class="badge">Phase 2</span></h3>
+        <p>
+          <strong>TF-IDF</strong> stands for <em>Term Frequency – Inverse Document Frequency</em>.
+          Fancy name, simple idea: turn each movie's text (title + genre + overview) into a
+          bag of weighted words, then find movies whose word bags look most alike.
+        </p>
+        <p>
+          <span class="hl-blue">TF (Term Frequency)</span> — how often a word appears in this movie's description.<br>
+          <span class="hl-blue">IDF (Inverse Document Frequency)</span> — how rare that word is across <em>all</em> movies.
+          Common words like "the" get near-zero weight; rare words like "heist" or "dystopian" get high weight.
+        </p>
+        <div class="example-box">
+          <div class="example-title">Real Example from MovieDux</div>
+          <p>You add <span class="highlight">Inception</span> to your watchlist.</p>
+          <p>TF-IDF sees its keywords: <span class="hl-blue">dream &bull; heist &bull; subconscious &bull; layers &bull; thriller</span></p>
+          <p>It scans every other movie and finds the ones with the most overlap in those words.
+             Result: <span class="highlight">Shutter Island</span>, <span class="highlight">Memento</span>, <span class="highlight">The Prestige</span></p>
+          <p style="margin-top:0.5rem; color:#666;">It never cared that people love these movies. It only cared about the words.</p>
+        </div>
+        <div class="where-used">
+          <span class="where-tag tfidf">RecommendationsPanel — "More Like This" on detail page</span>
+          <span class="where-tag tfidf">WatchlistRecommendations — "Recommended For You" section</span>
+        </div>
+      </div>
+
+      <!-- ── TF-IDF INTERACTIVE DEMO ── -->
+      <div class="demo-block">
+        <div class="demo-label">Interactive Demo — TF-IDF Keyword Similarity</div>
+
+        <div class="tfidf-selectors">
+          <div>
+            <div style="font-size:0.75rem;color:#666;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:1px;">Movie A</div>
+            <div class="movie-pills" id="pills-a"></div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:#666;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:1px;">Compare with</div>
+            <div class="movie-pills" id="pills-b"></div>
+          </div>
+        </div>
+
+        <div class="tfidf-columns">
+          <div>
+            <div class="tfidf-col-title a" id="col-a-title">Inception</div>
+            <div id="bars-a"></div>
+          </div>
+          <div>
+            <div class="tfidf-col-title b" id="col-b-title">Interstellar</div>
+            <div id="bars-b"></div>
+          </div>
+        </div>
+
+        <div class="similarity-result">
+          <div class="sim-score-wrap">
+            <svg class="sim-score-ring" viewBox="0 0 72 72">
+              <circle class="sim-ring-bg" cx="36" cy="36" r="30"/>
+              <circle class="sim-ring-fill" id="sim-ring" cx="36" cy="36" r="30"
+                      transform="rotate(-90 36 36)" stroke-dashoffset="188"/>
+            </svg>
+            <div>
+              <div class="sim-score-num" id="sim-score">0%</div>
+              <div class="sim-label">similarity</div>
+            </div>
+          </div>
+          <div class="sim-shared">
+            <div class="sim-shared-title">Shared keywords</div>
+            <div class="sim-shared-tags" id="shared-tags">
+              <span class="no-shared">Pick two movies to compare</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SVD Concept Card -->
+      <div class="concept-card">
+        <h3>SVD — Collaborative Filtering &nbsp;<span class="badge phase3">Phase 3</span></h3>
+        <p>
+          <strong>SVD</strong> stands for <em>Singular Value Decomposition</em> — a matrix math technique.
+          Forget the movie description entirely. Build a giant table of <em>who rated what</em>,
+          then find hidden patterns in that table.
+        </p>
+        <p>
+          The core idea: <span class="hl-purple">users who liked the same movies as you, probably like
+          the movies you haven't seen yet.</span> SVD compresses the ratings table into hidden "taste
+          dimensions" and uses them to predict your missing ratings.
+        </p>
+        <div class="example-box">
+          <div class="example-title">Real Example</div>
+          <p>You and User B both rated Inception ★5, Shutter Island ★4, Memento ★5 — nearly identical taste.</p>
+          <p>User B also rated Tenet ★4. You haven't seen it.</p>
+          <p>SVD predicts you'd rate Tenet <span class="hl-orange">~4/5</span> and recommends it.
+             It never read what Tenet is about — it just saw the pattern.</p>
+        </div>
+        <p>In MovieDux, Phase 3 seeds the model with <span class="hl-purple">synthetic ratings</span>
+           generated from TMDB popularity and genre data. Phase 4 will replace these with actual user ratings.</p>
+        <div class="where-used">
+          <span class="where-tag svd">WatchlistRecommendations — "You Might Also Like" section</span>
+          <span class="where-tag svd">backend/app/services/collab_filter.py</span>
+        </div>
+      </div>
+
+      <!-- ── SVD INTERACTIVE DEMO ── -->
+      <div class="demo-block">
+        <div class="demo-label">Interactive Demo — Live SVD Prediction</div>
+
+        <div class="svd-table-wrap">
+          <table class="svd-table" id="svd-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Inception</th>
+                <th>Shutter Island</th>
+                <th>Tenet</th>
+                <th>Memento</th>
+                <th style="color:#a78bfa;font-size:0.75rem;">Similarity<br>to You</th>
+              </tr>
+            </thead>
+            <tbody id="svd-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="svd-prediction-box">
+          <div>
+            <div class="svd-pred-label">Predicted rating for Tenet</div>
+            <div class="svd-pred-number" id="svd-pred-num">—</div>
+          </div>
+          <div class="svd-predict-stars" id="svd-pred-stars">
+            <span class="svd-predict-star" data-i="1">★</span>
+            <span class="svd-predict-star" data-i="2">★</span>
+            <span class="svd-predict-star" data-i="3">★</span>
+            <span class="svd-predict-star" data-i="4">★</span>
+            <span class="svd-predict-star" data-i="5">★</span>
+          </div>
+          <div class="svd-pred-desc" id="svd-pred-desc">—</div>
+        </div>
+
+        <div class="svd-hint">★ Click any star in the User B / C / D rows to change their ratings and watch the prediction update live.</div>
+      </div>
+
+      <!-- Compare Grid -->
+      <div class="compare-grid">
+        <div class="compare-card tfidf">
+          <h4>TF-IDF (Content-Based)</h4>
+          <ul>
+            <li><span class="label">Based on</span> Movie's words &amp; genres</li>
+            <li><span class="label">Asks</span> What movies are similar to <em>this movie</em>?</li>
+            <li><span class="label">Needs ratings?</span> No</li>
+            <li><span class="label">Blind spot</span> Ignores what humans actually feel</li>
+            <li><span class="label">Phase</span> Phase 2</li>
+          </ul>
+        </div>
+        <div class="compare-card svd">
+          <h4>SVD (Collaborative)</h4>
+          <ul>
+            <li><span class="label">Based on</span> Human rating patterns</li>
+            <li><span class="label">Asks</span> What do <em>people like you</em> enjoy?</li>
+            <li><span class="label">Needs ratings?</span> Yes</li>
+            <li><span class="label">Blind spot</span> Needs enough data to be accurate</li>
+            <li><span class="label">Phase</span> Phase 3</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Key Insight -->
+      <div class="insight">
+        <span class="icon">💡</span>
+        <p>
+          <strong>Why use both?</strong> TF-IDF works immediately — no data needed.
+          SVD gets smarter over time as more users rate movies. Together they cover each other's blind spots:
+          TF-IDF handles new movies nobody has rated yet; SVD surfaces hidden gems that don't sound similar
+          on paper but people with your taste consistently love. On the Watchlist page,
+          <strong>"Recommended For You"</strong> is TF-IDF and <strong>"You Might Also Like"</strong> is SVD
+          — two different signals on the same screen.
+        </p>
+      </div>
+    </section>
+
+    <footer class="page-footer">MovieDux learning log — updated May 2026</footer>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       INTERACTIVE DEMO JAVASCRIPT
+  ═══════════════════════════════════════════ -->
+  <script>
+  /* ─────────────────────────────────────────
+     TF-IDF DEMO
+  ───────────────────────────────────────── */
+  const MOVIES = {
+    inception:    { title: 'Inception',        keywords: [['dream',0.94],['heist',0.88],['subconscious',0.84],['layers',0.77],['thriller',0.62],['sci-fi',0.56]] },
+    dark_knight:  { title: 'The Dark Knight',  keywords: [['joker',0.95],['gotham',0.91],['chaos',0.83],['vigilante',0.79],['thriller',0.62],['crime',0.58]] },
+    interstellar: { title: 'Interstellar',     keywords: [['space',0.96],['wormhole',0.91],['gravity',0.85],['time',0.71],['sci-fi',0.56],['layers',0.25]] },
+    parasite:     { title: 'Parasite',         keywords: [['class',0.93],['deception',0.88],['satire',0.87],['family',0.72],['thriller',0.62],['drama',0.55]] },
+  };
+
+  const KEYS = Object.keys(MOVIES);
+  let selectedA = 'inception';
+  let selectedB = 'interstellar';
+
+  function buildPills() {
+    ['a','b'].forEach(side => {
+      const container = document.getElementById(`pills-${side}`);
+      container.innerHTML = '';
+      KEYS.forEach(key => {
+        const pill = document.createElement('button');
+        pill.className = 'movie-pill';
+        pill.textContent = MOVIES[key].title;
+        pill.dataset.key = key;
+        pill.onclick = () => selectMovie(side, key);
+        container.appendChild(pill);
+      });
+    });
+  }
+
+  function selectMovie(side, key) {
+    if (side === 'a') selectedA = key;
+    else selectedB = key;
+    renderTfidf();
+  }
+
+  function getVec(key) {
+    const v = {};
+    MOVIES[key].keywords.forEach(([w, wt]) => v[w] = wt);
+    return v;
+  }
+
+  function cosine(keyA, keyB) {
+    const va = getVec(keyA), vb = getVec(keyB);
+    const words = new Set([...Object.keys(va), ...Object.keys(vb)]);
+    let dot=0, ma=0, mb=0;
+    words.forEach(w => {
+      const a = va[w]||0, b = vb[w]||0;
+      dot += a*b; ma += a*a; mb += b*b;
+    });
+    return ma && mb ? dot / (Math.sqrt(ma)*Math.sqrt(mb)) : 0;
+  }
+
+  function getShared(keyA, keyB) {
+    const wa = new Set(MOVIES[keyA].keywords.map(([w])=>w));
+    return MOVIES[keyB].keywords.filter(([w])=>wa.has(w)).map(([w])=>w);
+  }
+
+  function renderBars(containerId, key, sharedWords, side) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    MOVIES[key].keywords.forEach(([word, weight]) => {
+      const isShared = sharedWords.includes(word);
+      const row = document.createElement('div');
+      row.className = 'keyword-row';
+      row.innerHTML = `
+        <span class="keyword-word ${isShared ? `shared-${side}` : ''}">${word}</span>
+        <div class="keyword-bar-wrap">
+          <div class="keyword-bar col-${side} ${isShared ? 'shared' : ''}" data-w="${weight}" style="width:0"></div>
+        </div>
+        <span class="keyword-weight">${weight.toFixed(2)}</span>
+      `;
+      el.appendChild(row);
+    });
+
+    // Animate bars in next frame
+    requestAnimationFrame(() => {
+      el.querySelectorAll('.keyword-bar').forEach(bar => {
+        bar.style.width = (parseFloat(bar.dataset.w) * 100) + '%';
+      });
+    });
+  }
+
+  function renderTfidf() {
+    // Update pill states
+    document.querySelectorAll('#pills-a .movie-pill').forEach(p => {
+      p.className = 'movie-pill' + (p.dataset.key === selectedA ? ' active' : '');
+    });
+    document.querySelectorAll('#pills-b .movie-pill').forEach(p => {
+      p.className = 'movie-pill' + (p.dataset.key === selectedB ? ' active-b' : '');
+    });
+
+    document.getElementById('col-a-title').textContent = MOVIES[selectedA].title;
+    document.getElementById('col-b-title').textContent = MOVIES[selectedB].title;
+
+    const shared = getShared(selectedA, selectedB);
+    renderBars('bars-a', selectedA, shared, 'a');
+    renderBars('bars-b', selectedB, shared, 'b');
+
+    // Similarity
+    const sim = cosine(selectedA, selectedB);
+    const pct = Math.round(sim * 100);
+    document.getElementById('sim-score').textContent = pct + '%';
+
+    // Ring: circumference = 2π×30 ≈ 188
+    const offset = 188 - (188 * sim);
+    document.getElementById('sim-ring').style.strokeDashoffset = offset;
+
+    // Colour ring by score
+    const ring = document.getElementById('sim-ring');
+    if (pct >= 50) ring.style.stroke = '#4ade80';
+    else if (pct >= 25) ring.style.stroke = '#f97316';
+    else ring.style.stroke = '#ef4444';
+
+    // Shared tags
+    const tagsEl = document.getElementById('shared-tags');
+    if (shared.length === 0) {
+      tagsEl.innerHTML = '<span class="no-shared">No shared keywords</span>';
+    } else {
+      tagsEl.innerHTML = shared.map(w => `<span class="sim-shared-tag">${w}</span>`).join('');
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     SVD DEMO
+  ───────────────────────────────────────── */
+  const SVD_MOVIES = ['Inception', 'Shutter Island', 'Tenet', 'Memento'];
+  const TARGET_COL = 2; // Tenet — what we're predicting for You
+
+  // rows: You, User B, User C, User D
+  // null = not rated (only You's Tenet slot)
+  let svdRatings = [
+    [5, 4, null, 5],
+    [5, 4, 4,    5],
+    [2, 3, 2,    2],
+    [4, 5, 3,    4],
+  ];
+
+  const USER_LABELS = ['You', 'User B', 'User C', 'User D'];
+
+  function cosineSim(userIdx) {
+    const you = svdRatings[0];
+    const other = svdRatings[userIdx];
+    let dot=0, ma=0, mb=0;
+    for (let i=0; i<SVD_MOVIES.length; i++) {
+      if (i === TARGET_COL) continue;
+      if (you[i] === null || other[i] === null) continue;
+      dot += you[i]*other[i];
+      ma  += you[i]*you[i];
+      mb  += other[i]*other[i];
+    }
+    return ma && mb ? dot/(Math.sqrt(ma)*Math.sqrt(mb)) : 0;
+  }
+
+  function predictTenet() {
+    const sims = [];
+    let weightedSum=0, totalWeight=0;
+    for (let u=1; u<svdRatings.length; u++) {
+      const s = cosineSim(u);
+      const r = svdRatings[u][TARGET_COL];
+      sims.push(s);
+      if (r !== null && s > 0) {
+        weightedSum += s * r;
+        totalWeight += s;
+      }
+    }
+    const pred = totalWeight > 0 ? weightedSum / totalWeight : 0;
+    return { pred, sims };
+  }
+
+  function renderStars(rating, editable, userIdx, colIdx) {
+    if (rating === null) return ''; // handled separately
+    const stars = document.createElement('div');
+    stars.className = 'svd-stars';
+    for (let s=1; s<=5; s++) {
+      const span = document.createElement('span');
+      span.className = 'svd-star' + (s <= rating ? ' filled' : '');
+      span.textContent = '★';
+      if (editable) {
+        span.onmouseenter = () => {
+          stars.querySelectorAll('.svd-star').forEach((st,i) => {
+            st.className = 'svd-star' + (i < s ? ' preview' : '');
+          });
+        };
+        span.onmouseleave = () => {
+          const cur = svdRatings[userIdx][colIdx];
+          stars.querySelectorAll('.svd-star').forEach((st,i) => {
+            st.className = 'svd-star' + (i < cur ? ' filled' : '');
+          });
+        };
+        span.onclick = () => {
+          svdRatings[userIdx][colIdx] = s;
+          renderSvdTable();
+        };
+      }
+      stars.appendChild(span);
+    }
+    return stars;
+  }
+
+  function renderSvdTable() {
+    const tbody = document.getElementById('svd-tbody');
+    tbody.innerHTML = '';
+    const { pred, sims } = predictTenet();
+
+    svdRatings.forEach((row, u) => {
+      const tr = document.createElement('tr');
+      if (u === 0) tr.className = 'you-row';
+      else if (sims[u-1] > 0.85) tr.className = 'similar-row';
+
+      // Name cell
+      const nameTd = document.createElement('td');
+      nameTd.textContent = USER_LABELS[u];
+      tr.appendChild(nameTd);
+
+      // Rating cells
+      SVD_MOVIES.forEach((_, c) => {
+        const td = document.createElement('td');
+        const val = row[c];
+        if (u === 0 && c === TARGET_COL) {
+          // Prediction cell
+          td.className = 'svd-predict-cell';
+          td.style.color = '#f97316';
+          if (pred > 0) {
+            const predStars = document.createElement('div');
+            predStars.className = 'svd-predict-stars';
+            for (let s=1; s<=5; s++) {
+              const sp = document.createElement('span');
+              sp.className = 'svd-predict-star' + (s <= Math.round(pred) ? ' filled' : (s-0.5 <= pred ? ' half' : ''));
+              sp.textContent = '★';
+              predStars.appendChild(sp);
+            }
+            td.appendChild(predStars);
+          } else {
+            td.textContent = '?';
+            td.style.color = '#555';
+          }
+        } else {
+          const starsEl = renderStars(val, u !== 0, u, c);
+          if (starsEl) td.appendChild(starsEl);
+          else { td.textContent = '—'; td.style.color = '#333'; }
+        }
+        tr.appendChild(td);
+      });
+
+      // Similarity column
+      const simTd = document.createElement('td');
+      simTd.className = 'svd-sim-cell';
+      if (u === 0) {
+        simTd.textContent = '—';
+        simTd.style.color = '#333';
+      } else {
+        const s = sims[u-1];
+        const pct = Math.round(s*100);
+        const wrap = document.createElement('div');
+        wrap.className = 'svd-sim-bar-wrap';
+        wrap.innerHTML = `
+          <div class="svd-sim-mini">
+            <div class="svd-sim-mini-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="svd-sim-pct">${pct}%</span>
+        `;
+        simTd.appendChild(wrap);
+      }
+      tr.appendChild(simTd);
+
+      tbody.appendChild(tr);
+    });
+
+    // Update prediction box
+    const predNum = document.getElementById('svd-pred-num');
+    const predStarsEl = document.getElementById('svd-pred-stars');
+    const predDesc = document.getElementById('svd-pred-desc');
+
+    if (pred > 0) {
+      predNum.textContent = pred.toFixed(1) + ' / 5';
+      predStarsEl.querySelectorAll('.svd-predict-star').forEach((sp,i) => {
+        sp.className = 'svd-predict-star' + (i < Math.round(pred) ? ' filled' : '');
+      });
+
+      // Find most similar user
+      const maxSimIdx = sims.indexOf(Math.max(...sims));
+      const topUser = USER_LABELS[maxSimIdx+1];
+      const topPct  = Math.round(sims[maxSimIdx]*100);
+      predDesc.innerHTML = `Based on user similarity. <strong>${topUser}</strong> (${topPct}% similar to you) rated Tenet ${svdRatings[maxSimIdx+1][TARGET_COL]}/5 — that pulls the prediction strongly.`;
+    } else {
+      predNum.textContent = '—';
+      predDesc.textContent = 'Not enough data to predict.';
+    }
+  }
+
+  /* ─────────────────────────────────────────
+     INIT
+  ───────────────────────────────────────── */
+  buildPills();
+  renderTfidf();
+  renderSvdTable();
+  </script>
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MovieDux — Phase 3 Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f13;
+      color: #e0e0e0;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    a { color: #f97316; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .page { max-width: 900px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .page-header {
+      margin-bottom: 3rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #2a2a35;
+    }
+    .phase-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 99px; margin-bottom: 0.75rem;
+      background: #1e1a2a; color: #a78bfa; border: 1px solid #3a2d5a;
+    }
+    .page-header h1 { font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+    .page-header h1 span { color: #f97316; }
+    .page-header p { margin-top: 0.5rem; color: #888; font-size: 0.95rem; max-width: 640px; }
+
+    .meta-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .meta-item { font-size: 0.82rem; color: #666; }
+    .meta-item strong { color: #aaa; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 3.5rem; }
+    .section-label {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: #f97316; margin-bottom: 0.5rem;
+    }
+    .section h2 { font-size: 1.45rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+    .section > p { color: #999; margin-bottom: 1rem; max-width: 720px; }
+
+    /* ── Feature Cards ── */
+    .features-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;
+    }
+    @media (max-width: 600px) { .features-grid { grid-template-columns: 1fr; } }
+
+    .feature-card {
+      background: #16161e; border: 1px solid #2a2a35;
+      border-radius: 12px; padding: 1.25rem 1.5rem;
+    }
+    .feature-card h3 {
+      font-size: 0.95rem; font-weight: 700; color: #fff;
+      margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .feature-card h3 .icon { font-size: 1.1rem; }
+    .feature-card p { font-size: 0.88rem; color: #888; margin-bottom: 0.75rem; }
+    .feature-files { display: flex; flex-direction: column; gap: 3px; }
+    .file-tag {
+      font-size: 0.75rem; font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #a78bfa; background: #1a1a2a; border: 1px solid #2a2a40;
+      border-radius: 4px; padding: 2px 7px; display: inline-block; width: fit-content;
+    }
+    .file-tag.orange { color: #fb923c; background: #1e1510; border-color: #3a2510; }
+
+    /* ── Flow Diagrams ── */
+    .flow-box {
+      background: #111118; border: 1px dashed #2e2e40;
+      border-radius: 14px; padding: 1.5rem; margin: 1.25rem 0;
+    }
+    .flow-title {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #888; margin-bottom: 1.25rem;
+    }
+
+    .flow {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0;
+      overflow-x: auto; padding-bottom: 0.5rem;
+    }
+
+    .flow-node {
+      background: #1a1a24; border: 1px solid #2a2a35; border-radius: 8px;
+      padding: 0.5rem 0.75rem; font-size: 0.8rem; white-space: nowrap;
+      flex-shrink: 0; text-align: center;
+    }
+    .flow-node .node-label { font-weight: 600; color: #ddd; }
+    .flow-node .node-sub  { font-size: 0.7rem; color: #666; margin-top: 1px; font-family: 'SF Mono', monospace; }
+
+    .flow-node.ui      { border-color: #f97316; }
+    .flow-node.ui .node-label { color: #f97316; }
+    .flow-node.hook    { border-color: #38bdf8; }
+    .flow-node.hook .node-label { color: #38bdf8; }
+    .flow-node.api     { border-color: #4ade80; }
+    .flow-node.api .node-label { color: #4ade80; }
+    .flow-node.backend { border-color: #a78bfa; }
+    .flow-node.backend .node-label { color: #a78bfa; }
+    .flow-node.ai      { border-color: #fbbf24; }
+    .flow-node.ai .node-label { color: #fbbf24; }
+
+    .flow-arrow {
+      font-size: 1rem; color: #3a3a45; padding: 0 4px; flex-shrink: 0;
+    }
+
+    .flow-row { display: flex; flex-direction: column; gap: 0.6rem; }
+    .flow-row .flow { margin: 0; }
+
+    .flow-return {
+      display: flex; align-items: center; gap: 0; flex-direction: row-reverse;
+      flex-wrap: wrap;
+    }
+    .flow-return .flow-arrow { transform: rotate(180deg); }
+    .flow-return .flow-node.ui .node-label { color: #fb923c; }
+
+    .flow-separator {
+      border: none; border-top: 1px dashed #2a2a35; margin: 0.75rem 0;
+    }
+
+    /* ── File Map ── */
+    .file-map { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .file-group { background: #16161e; border: 1px solid #2a2a35; border-radius: 10px; overflow: hidden; }
+    .file-group-header {
+      background: #1a1a24; padding: 0.6rem 1rem;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: #666; border-bottom: 1px solid #2a2a35;
+    }
+    .file-row {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 0.7rem 1rem;
+      border-bottom: 1px solid #1a1a24;
+    }
+    .file-row:last-child { border-bottom: none; }
+    .file-path {
+      font-size: 0.78rem; font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #a78bfa; white-space: nowrap; min-width: 220px; flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .file-path.orange { color: #fb923c; }
+    .file-desc { font-size: 0.85rem; color: #888; flex: 1; }
+    .file-desc strong { color: #ccc; }
+
+    /* ── API Table ── */
+    .api-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .api-table th {
+      background: #1a1a24; color: #666; font-weight: 600;
+      padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid #2a2a35;
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .api-table td { padding: 0.65rem 1rem; border-bottom: 1px solid #1a1a24; color: #bbb; }
+    .api-table tr:last-child td { border-bottom: none; }
+    .api-table tr:hover td { background: #13131c; }
+
+    .method {
+      font-size: 0.72rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 4px; font-family: monospace;
+    }
+    .method.get  { background: #0d2a1a; color: #4ade80; border: 1px solid #1a4a2a; }
+    .method.post { background: #1a1a0d; color: #fbbf24; border: 1px solid #3a3a1a; }
+
+    .endpoint { font-family: 'SF Mono', monospace; color: #a78bfa; font-size: 0.82rem; }
+
+    /* ── Code Snippet ── */
+    .code-block {
+      background: #0d1117; border: 1px solid #2a2a35; border-left: 3px solid #a78bfa;
+      border-radius: 8px; padding: 1rem 1.25rem; margin: 0.75rem 0;
+      font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem;
+      color: #ccc; overflow-x: auto; line-height: 1.7;
+    }
+    .code-block .c  { color: #555; }
+    .code-block .k  { color: #a78bfa; }
+    .code-block .s  { color: #4ade80; }
+    .code-block .f  { color: #38bdf8; }
+    .code-block .n  { color: #fbbf24; }
+
+    /* ── Insight ── */
+    .insight {
+      background: #141420; border: 1px solid #2a2a45; border-radius: 10px;
+      padding: 1.1rem 1.4rem; margin-top: 1rem;
+      display: flex; gap: 0.75rem; align-items: flex-start;
+    }
+    .insight .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 3px; }
+    .insight p { font-size: 0.88rem; color: #999; margin: 0; }
+    .insight p strong { color: #ddd; }
+
+    /* ── Quick Reference ── */
+    .qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 560px) { .qr-grid { grid-template-columns: 1fr; } }
+
+    .qr-card {
+      background: #16161e; border: 1px solid #2a2a35; border-radius: 10px; padding: 1rem 1.25rem;
+    }
+    .qr-card h4 { font-size: 0.85rem; font-weight: 700; color: #aaa; margin-bottom: 0.6rem; }
+    .qr-card code {
+      display: block; font-family: 'SF Mono', monospace; font-size: 0.8rem;
+      color: #4ade80; background: #0d1a0d; padding: 0.6rem 0.75rem;
+      border-radius: 6px; margin-bottom: 0.4rem;
+    }
+
+    /* ── Footer ── */
+    .page-footer {
+      margin-top: 4rem; padding-top: 1.5rem;
+      border-top: 1px solid #1e1e28; color: #444; font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="page-header">
+    <div class="phase-badge">Phase 3</div>
+    <h1>SVD Collaborative Filtering <span>+ AI Chat</span></h1>
+    <p>
+      This guide walks through everything built in Phase 3 — what each file does,
+      how data flows end to end, and where to look when navigating the code.
+    </p>
+    <div class="meta-row">
+      <span class="meta-item"><strong>AI provider:</strong> Groq (Llama 3.3 70B)</span>
+      <span class="meta-item"><strong>ML model:</strong> SVD via scikit-surprise</span>
+      <span class="meta-item"><strong>New endpoints:</strong> 4</span>
+      <span class="meta-item"><strong>New frontend files:</strong> 5</span>
+    </div>
+  </header>
+
+  <!-- ── Features Overview ── -->
+  <section class="section">
+    <span class="section-label">What Was Built</span>
+    <h2>4 New Features</h2>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <h3><span class="icon">🤖</span> SVD Collaborative Filtering</h3>
+        <p>Matrix factorization model that finds users with similar taste and predicts what you'd rate movies you haven't seen.</p>
+        <div class="feature-files">
+          <span class="file-tag">backend/app/services/collab_filter.py</span>
+          <span class="file-tag">backend/app/services/synthetic_ratings.py</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <h3><span class="icon">✨</span> AI Chat Panel</h3>
+        <p>Slide-out panel where you describe a movie mood in plain English. Groq AI reads your catalog and returns matching films.</p>
+        <div class="feature-files">
+          <span class="file-tag orange">src/components/ChatPanel.tsx</span>
+          <span class="file-tag orange">src/hooks/useChat.ts</span>
+          <span class="file-tag">backend/app/services/gemini_client.py</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <h3><span class="icon">★</span> Star Rating Widget</h3>
+        <p>5-star rating on every movie card. Ratings persist in localStorage and POST to the backend to feed the SVD model.</p>
+        <div class="feature-files">
+          <span class="file-tag orange">src/components/RatingStars.tsx</span>
+          <span class="file-tag orange">src/context/UserContext.tsx</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <h3><span class="icon">💬</span> Streaming "Why This?"</h3>
+        <p>Click "Why this?" on any chat result and Groq streams back a personalized 2–3 sentence explanation word-by-word via SSE.</p>
+        <div class="feature-files">
+          <span class="file-tag">backend/app/routes/chat.py → /explain</span>
+          <span class="file-tag orange">src/hooks/useChat.ts → explainMovie()</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Data Flows ── -->
+  <section class="section">
+    <span class="section-label">Data Flows</span>
+    <h2>How Data Moves End to End</h2>
+    <p>Three separate flows — each starts at a user action and traces through every layer to the response.</p>
+
+    <!-- Flow 1: Chat -->
+    <div class="flow-box">
+      <div class="flow-title">Flow 1 — AI Chat (Natural Language Movie Search)</div>
+      <div class="flow-row">
+        <div class="flow">
+          <div class="flow-node ui"><div class="node-label">User types query</div><div class="node-sub">ChatPanel.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node hook"><div class="node-label">sendMessage()</div><div class="node-sub">useChat.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node api"><div class="node-label">sendChatMessage()</div><div class="node-sub">api.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">POST /api/chat/message</div><div class="node-sub">chat.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">get_recommendations_from_query()</div><div class="node-sub">gemini_client.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node ai"><div class="node-label">Groq API</div><div class="node-sub">Llama 3.3 70B</div></div>
+        </div>
+        <hr class="flow-separator">
+        <div class="flow flow-return">
+          <div class="flow-node ui"><div class="node-label">Movie cards shown</div><div class="node-sub">ChatPanel.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node hook"><div class="node-label">messages state</div><div class="node-sub">useChat.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node api"><div class="node-label">{type, reasoning, movies}</div><div class="node-sub">api.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">movie objects matched</div><div class="node-sub">chat.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node ai"><div class="node-label">{type:"movies", recommended_ids}</div><div class="node-sub">JSON response</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flow 2: Why This SSE -->
+    <div class="flow-box">
+      <div class="flow-title">Flow 2 — "Why This?" Streaming Explanation (SSE)</div>
+      <div class="flow-row">
+        <div class="flow">
+          <div class="flow-node ui"><div class="node-label">Click "Why this?"</div><div class="node-sub">ChatPanel.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node hook"><div class="node-label">explainMovie()</div><div class="node-sub">useChat.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node api"><div class="node-label">explainMovieRec()</div><div class="node-sub">api.ts (fetch)</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">POST /api/chat/explain</div><div class="node-sub">chat.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">stream_explanation()</div><div class="node-sub">gemini_client.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node ai"><div class="node-label">Groq stream</div><div class="node-sub">text/event-stream</div></div>
+        </div>
+        <hr class="flow-separator">
+        <div class="flow flow-return">
+          <div class="flow-node ui"><div class="node-label">Text appears word-by-word</div><div class="node-sub">ChatPanel.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node hook"><div class="node-label">explanations state</div><div class="node-sub">useChat.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node api"><div class="node-label">ReadableStream reader</div><div class="node-sub">SSE parsing</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">yield "data: chunk\n\n"</div><div class="node-sub">Flask SSE</div></div>
+        </div>
+      </div>
+      <div class="insight" style="margin-top:1rem;">
+        <span class="icon">💡</span>
+        <p><strong>Why SSE (Server-Sent Events) and not WebSocket?</strong> SSE is one-directional (server → browser) and works perfectly for streaming text. No extra setup needed — Flask yields chunks, the browser reads them with <code>response.body.getReader()</code>.</p>
+      </div>
+    </div>
+
+    <!-- Flow 3: Rating + SVD -->
+    <div class="flow-box">
+      <div class="flow-title">Flow 3 — Star Rating → SVD → "You Might Also Like"</div>
+      <div class="flow-row">
+        <div class="flow">
+          <div class="flow-node ui"><div class="node-label">Click ★ on movie card</div><div class="node-sub">RatingStars.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node hook"><div class="node-label">submitRating()</div><div class="node-sub">UserContext.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node api"><div class="node-label">localStorage save</div><div class="node-sub">persists on refresh</div></div>
+          <div class="flow-arrow">+</div>
+          <div class="flow-node api"><div class="node-label">postRating()</div><div class="node-sub">api.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">POST /api/recommendations/ratings</div><div class="node-sub">recommendations.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">collab_filter.add_rating()</div><div class="node-sub">collab_filter.py</div></div>
+        </div>
+        <hr class="flow-separator">
+        <div class="flow">
+          <div class="flow-node ui"><div class="node-label">Watchlist page opens</div><div class="node-sub">WatchlistRecs.tsx</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node api"><div class="node-label">fetchCollabRecommendations(userId)</div><div class="node-sub">api.ts</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">GET /api/recommendations/collab/:userId</div><div class="node-sub">recommendations.py</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node backend"><div class="node-label">collab_filter.get_top_n()</div><div class="node-sub">SVD predictions</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-node ui"><div class="node-label">"You Might Also Like"</div><div class="node-sub">section renders</div></div>
+        </div>
+      </div>
+      <div class="insight" style="margin-top:1rem;">
+        <span class="icon">💡</span>
+        <p><strong>Cold start:</strong> The SVD model trains at startup on <strong>200 synthetic users × 30–50 movies</strong> each (generated in <code>synthetic_ratings.py</code> from TMDB popularity data). Real user ratings get added in memory via <code>add_rating()</code>. Phase 4 will persist these to SQLite and retrain.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── File Map ── -->
+  <section class="section">
+    <span class="section-label">Code Navigation</span>
+    <h2>Every Phase 3 File</h2>
+
+    <div class="file-map">
+
+      <div class="file-group">
+        <div class="file-group-header">Backend — New Services</div>
+        <div class="file-row">
+          <span class="file-path">backend/app/services/<br>collab_filter.py</span>
+          <span class="file-desc">
+            <strong>SVD model singleton.</strong> Wraps scikit-surprise's SVD.
+            <code>fit(df)</code> trains on a ratings DataFrame.
+            <code>get_top_n(user_id, candidate_ids)</code> returns predicted scores.
+            <code>add_rating()</code> stores real user ratings in memory.
+            Imported as a module-level singleton so it trains once and stays hot.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path">backend/app/services/<br>synthetic_ratings.py</span>
+          <span class="file-desc">
+            <strong>Cold-start seed data.</strong> Generates a pandas DataFrame of 200 fake users, each rating 30–50 movies, weighted by TMDB popularity and a random favourite genre. Called once in <code>run.py</code> at startup before <code>collab_filter.fit()</code>.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path">backend/app/services/<br>gemini_client.py</span>
+          <span class="file-desc">
+            <strong>Groq AI client</strong> (file kept the original name for route compatibility).
+            Two functions: <code>get_recommendations_from_query(query, catalog)</code> — detects intent (small talk vs movie request) and returns JSON.
+            <code>stream_explanation(movie, reasons)</code> — SSE generator that yields text chunks from Groq.
+          </span>
+        </div>
+      </div>
+
+      <div class="file-group">
+        <div class="file-group-header">Backend — Routes (additions to existing files)</div>
+        <div class="file-row">
+          <span class="file-path">backend/app/routes/<br>chat.py</span>
+          <span class="file-desc">
+            <strong>New blueprint.</strong> Two endpoints: <code>POST /api/chat/message</code> calls Groq and returns either a chat reply or movie results. <code>POST /api/chat/explain</code> streams a "Why this?" explanation via SSE using Flask's <code>stream_with_context</code>.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path">backend/app/routes/<br>recommendations.py</span>
+          <span class="file-desc">
+            <strong>Two new routes added</strong> to the existing Phase 2 file.
+            <code>GET /collab/:userId</code> — calls <code>collab_filter.get_top_n()</code> and enriches with full movie objects.
+            <code>POST /ratings</code> — validates and forwards rating to <code>collab_filter.add_rating()</code>.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path">backend/run.py</span>
+          <span class="file-desc">
+            <strong>Startup sequence.</strong> Loads <code>.env</code> first, then calls <code>init_cache()</code>, <code>generate_synthetic_ratings()</code>, and <code>collab_filter.fit(df)</code> — in that order — before Flask starts serving.
+          </span>
+        </div>
+      </div>
+
+      <div class="file-group">
+        <div class="file-group-header">Frontend — New Files</div>
+        <div class="file-row">
+          <span class="file-path orange">src/context/<br>UserContext.tsx</span>
+          <span class="file-desc">
+            <strong>React Context for global user state.</strong> Generates a UUID on first visit (persisted in localStorage as <code>moviedux_user_id</code>). Stores star ratings (persisted as <code>moviedux_ratings</code>). <code>submitRating()</code> saves locally and POSTs to backend. Wraps the whole app in <code>App.tsx</code> via <code>&lt;UserProvider&gt;</code>.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path orange">src/components/<br>RatingStars.tsx</span>
+          <span class="file-desc">
+            <strong>5-star rating widget.</strong> Reads saved rating from <code>useUser().ratings[movieId]</code>. Hover previews stars, click locks in. Calls <code>submitRating()</code> on click. Placed inside <code>MovieCard.tsx</code> hover overlay.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path orange">src/components/<br>ChatPanel.tsx</span>
+          <span class="file-desc">
+            <strong>Slide-out AI chat panel.</strong> Opens via the orange "✨ Ask AI" FAB button (fixed bottom-right). Shows hint prompts when empty. Renders user bubbles and assistant responses — text-only for greetings, movie cards for search results. Each movie card has a "✦ Why this?" button that triggers streaming explanation.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path orange">src/hooks/<br>useChat.ts</span>
+          <span class="file-desc">
+            <strong>Chat state management.</strong> <code>sendMessage()</code> — adds user message, calls backend, appends assistant reply. <code>explainMovie()</code> — opens a SSE ReadableStream, parses <code>data: chunk\n\n</code> lines, and streams text into <code>explanations</code> state keyed by movie ID. Handles <code>[DONE]</code> sentinel to stop the stream.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path orange">src/styles/<br>ChatPanel.css</span>
+          <span class="file-desc">
+            All chat UI styles — FAB button, slide-in panel animation (<code>translateX</code>), backdrop overlay, message bubbles, movie result cards, the blinking streaming cursor, and loading bounce dots.
+          </span>
+        </div>
+      </div>
+
+      <div class="file-group">
+        <div class="file-group-header">Frontend — Modified Files</div>
+        <div class="file-row">
+          <span class="file-path orange">src/services/api.ts</span>
+          <span class="file-desc">
+            <strong>4 new functions added:</strong> <code>fetchCollabRecommendations(userId, n)</code>, <code>postRating(userId, movieId, rating)</code>, <code>sendChatMessage(query)</code> returns a union type <code>{type:"chat"} | {type:"movies"}</code>, <code>explainMovieRec(movie, reasons)</code> returns a <code>ReadableStreamDefaultReader</code> for SSE.
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path orange">src/components/<br>WatchlistRecommendations.tsx</span>
+          <span class="file-desc">
+            <strong>"You Might Also Like" section added.</strong> A second <code>useEffect</code> fetches SVD collab recs using <code>userId</code> from <code>useUser()</code>. Section is hidden until the backend responds with results (fails silently if backend is down).
+          </span>
+        </div>
+        <div class="file-row">
+          <span class="file-path orange">src/App.tsx</span>
+          <span class="file-desc">
+            Wrapped in <code>&lt;UserProvider&gt;</code>. Added <code>chatOpen</code> state. The <code>&lt;ChatPanel&gt;</code> and the FAB button (<code>.chat-fab</code>) are rendered here at the root level so they appear on every page.
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── API Endpoints ── -->
+  <section class="section">
+    <span class="section-label">API Reference</span>
+    <h2>New Endpoints in Phase 3</h2>
+
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Request</th>
+          <th>Response</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="method get">GET</span></td>
+          <td><span class="endpoint">/api/recommendations/collab/:userId</span></td>
+          <td style="color:#666;">?n=10</td>
+          <td style="color:#888;"><code style="font-size:0.78rem;">{results: Movie[]}</code></td>
+        </tr>
+        <tr>
+          <td><span class="method post">POST</span></td>
+          <td><span class="endpoint">/api/recommendations/ratings</span></td>
+          <td style="color:#666;">{user_id, movie_id, rating}</td>
+          <td style="color:#888;"><code style="font-size:0.78rem;">{ok: true}</code></td>
+        </tr>
+        <tr>
+          <td><span class="method post">POST</span></td>
+          <td><span class="endpoint">/api/chat/message</span></td>
+          <td style="color:#666;">{query}</td>
+          <td style="color:#888;"><code style="font-size:0.78rem;">{type, message} or {type, reasoning, movies}</code></td>
+        </tr>
+        <tr>
+          <td><span class="method post">POST</span></td>
+          <td><span class="endpoint">/api/chat/explain</span></td>
+          <td style="color:#666;">{movie, reasons}</td>
+          <td style="color:#888;"><code style="font-size:0.78rem;">text/event-stream SSE</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="insight" style="margin-top:1rem;">
+      <span class="icon">📌</span>
+      <p>The <strong>/chat/message</strong> endpoint returns a <strong>union type</strong>. If the user sends a greeting or small talk, Groq returns <code>{type:"chat", message:"..."}</code> — no movie search runs. If it's a real movie request, it returns <code>{type:"movies", reasoning, recommended_ids}</code>. This intent detection is entirely in the Groq system prompt inside <code>gemini_client.py</code>.</p>
+    </div>
+  </section>
+
+  <!-- ── Key Patterns ── -->
+  <section class="section">
+    <span class="section-label">Key Patterns to Know</span>
+    <h2>Things Worth Understanding Before Editing</h2>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Pattern 1 — Module-level singleton (collab_filter.py)</div>
+      <div class="code-block">
+<span class="c"># At the bottom of collab_filter.py:</span>
+<span class="n">collab_filter</span> = CollaborativeFilter()
+
+<span class="c"># In run.py at startup:</span>
+<span class="n">ratings_df</span> = <span class="f">generate_synthetic_ratings</span>()
+<span class="n">collab_filter</span>.<span class="f">fit</span>(<span class="n">ratings_df</span>)
+
+<span class="c"># In recommendations.py routes — just import and use:</span>
+<span class="k">from</span> ..services.collab_filter <span class="k">import</span> <span class="n">collab_filter</span>
+<span class="n">collab_filter</span>.<span class="f">get_top_n</span>(<span class="n">user_id</span>, <span class="n">candidate_ids</span>)
+      </div>
+      <p style="font-size:0.85rem;color:#777;">The model is trained once at startup and shared across all requests. Never instantiate <code>CollaborativeFilter()</code> again elsewhere — import the singleton.</p>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Pattern 2 — SSE streaming (chat.py + useChat.ts)</div>
+      <div class="code-block">
+<span class="c"># Backend (Flask) yields SSE lines:</span>
+<span class="k">yield</span> <span class="s">f"data: {text}\n\n"</span>   <span class="c"># each chunk</span>
+<span class="k">yield</span> <span class="s">"data: [DONE]\n\n"</span>       <span class="c"># sentinel to close stream</span>
+
+<span class="c"># Frontend (useChat.ts) reads the stream:</span>
+<span class="k">const</span> reader = <span class="k">await</span> <span class="f">explainMovieRec</span>(movie, reasons)
+<span class="k">const</span> { done, value } = <span class="k">await</span> reader.<span class="f">read</span>()
+<span class="c">// parse "data: chunk\n\n" lines manually</span>
+      </div>
+      <p style="font-size:0.85rem;color:#777;">The backend uses <code>stream_with_context(generator)</code> from Flask. The frontend uses the native Fetch API's <code>response.body.getReader()</code> — not EventSource — so it works with POST requests.</p>
+    </div>
+
+    <div class="flow-box">
+      <div class="flow-title">Pattern 3 — React Context (UserContext.tsx)</div>
+      <div class="code-block">
+<span class="c">// Any component can access userId and ratings without prop drilling:</span>
+<span class="k">import</span> { useUser } <span class="k">from</span> <span class="s">'../context/UserContext'</span>
+
+<span class="k">function</span> <span class="f">MyComponent</span>() {
+  <span class="k">const</span> { userId, ratings, submitRating } = <span class="f">useUser</span>()
+  <span class="c">// userId — UUID, stable across refreshes</span>
+  <span class="c">// ratings — { [movieId]: 1-5 }</span>
+  <span class="c">// submitRating(movieId, stars) — saves + POSTs</span>
+}
+      </div>
+      <p style="font-size:0.85rem;color:#777;">UserProvider wraps the whole app in App.tsx, so <code>useUser()</code> works anywhere. Both userId and ratings persist to localStorage so they survive page refreshes.</p>
+    </div>
+  </section>
+
+  <!-- ── Quick Start ── -->
+  <section class="section">
+    <span class="section-label">Running It</span>
+    <h2>Quick Start</h2>
+
+    <div class="qr-grid">
+      <div class="qr-card">
+        <h4>Backend (Terminal 1)</h4>
+        <code>cd backend</code>
+        <code>python run.py</code>
+        <p style="font-size:0.8rem;color:#666;margin-top:0.5rem;">Watch for: <span style="color:#4ade80;">SVD training complete</span> before making requests.</p>
+      </div>
+      <div class="qr-card">
+        <h4>Frontend (Terminal 2)</h4>
+        <code>npm start</code>
+        <code># → http://localhost:3000</code>
+      </div>
+      <div class="qr-card">
+        <h4>Required .env (backend/.env)</h4>
+        <code>TMDB_API_KEY=...</code>
+        <code>GROQ_API_KEY=gsk_...</code>
+      </div>
+      <div class="qr-card">
+        <h4>Test the Chat</h4>
+        <code># Say "Hi" → conversational reply</code>
+        <code># Say "dark thriller" → movies</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Key Decisions & Why ── -->
+  <section class="section">
+    <span class="section-label">Key Decisions &amp; Why</span>
+    <h2>Why We Did It This Way</h2>
+    <p>Real decisions made during Phase 3 — the reasoning, the tradeoff, and what breaks if you change them.</p>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 1 — We send the movie catalog to Groq on every chat request</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        Groq can only return movies that exist in the list we send it. Think of it like a restaurant menu —
+        the waiter can only serve dishes on the menu. If a movie isn't in the list, Groq has no ID to return,
+        and no card shows up — even if Groq knows the movie exists.
+      </p>
+      <div class="code-block">
+<span class="c"># gemini_client.py — we build a slim catalog and send it with every query</span>
+slim_catalog = [{ <span class="s">"id"</span>: m[<span class="s">"tmdbId"</span>], <span class="s">"title"</span>: m[<span class="s">"title"</span>], <span class="s">"genre"</span>: m[<span class="s">"genre"</span>] } <span class="k">for</span> m <span class="k">in</span> catalog[:<span class="n">300</span>]]
+<span class="c"># Groq picks IDs from this list → backend looks them up → returns full movie cards</span>
+      </div>
+      <p style="font-size:0.82rem;color:#666;">
+        <strong style="color:#aaa;">Tradeoff:</strong> More movies in the list = better coverage for specific title searches, but larger token count.
+        We settled on 300 as the balance point.
+      </p>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 2 — Catalog: 100 movies, no overviews, lighter model</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        Three iterations to get here:
+      </p>
+      <ul style="font-size:0.87rem;color:#999;margin-left:1.25rem;margin-bottom:0.75rem;line-height:1.9;">
+        <li><strong style="color:#ccc;">Start:</strong> 100 movies + overview[:120] — worked but limited search coverage</li>
+        <li><strong style="color:#ccc;">Attempt:</strong> 300 movies + overview[:60] — HTTP 413 (13,800 tokens, limit 12,000/min)</li>
+        <li><strong style="color:#ccc;">Fix:</strong> 300 movies, no overview — under the per-minute limit but hit 100k daily cap in ~30 searches</li>
+        <li><strong style="color:#ccc;">Final:</strong> 100 movies, no overview + switched to <code>llama-3.1-8b-instant</code> (500k tokens/day) — ~400 searches/day</li>
+      </ul>
+      <p style="font-size:0.82rem;color:#666;">
+        <strong style="color:#aaa;">Why no overview?</strong> Groq already knows what Inception, The Dark Knight etc. are about from training. We only need the ID so Groq can reference it back.
+        The catalog is a menu of IDs, not a knowledge source.
+      </p>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 3 — AI chat is for vibes only, not specific movie lookup</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        We tried adding a third intent case — if the user types a specific movie title like "Inception",
+        return that exact card. It didn't work reliably: Groq matched by vibe instead of title and returned
+        Tenet and other related movies instead of Inception itself.
+      </p>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The fix was to remove that case entirely. The <strong>search bar already does exact movie lookup perfectly</strong>.
+        The AI chat's job is vibe/mood matching and conversation — not replacing the search bar.
+        Two clear responsibilities, two separate tools.
+      </p>
+      <div class="code-block">
+<span class="c"># Two cases only in the system prompt:</span>
+<span class="c"># A) Greeting/small talk → {type: "chat", message: "..."}</span>
+<span class="c"># B) Vibe/mood/genre → {type: "movies", recommended_ids: [6-10 movies]}</span>
+<span class="c">#</span>
+<span class="c"># Want a specific movie? Use the search bar.</span>
+      </div>
+      <p style="font-size:0.82rem;color:#666;">
+        <strong style="color:#aaa;">Rule of thumb for future features:</strong> before building something into AI chat,
+        ask "does a simpler tool already do this better?" If yes, keep the boundary clean.
+      </p>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 4 — SSE (Server-Sent Events) for streaming, not WebSocket</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The "Why this?" explanation streams text word-by-word. We used SSE instead of WebSockets because
+        SSE is one-directional (server → browser only), which is exactly what streaming text needs.
+        WebSockets are bidirectional — great for chat apps, overkill here. SSE also works with a regular
+        HTTP POST request, no upgrade handshake needed.
+      </p>
+      <div class="code-block">
+<span class="c"># Backend: Flask generator yields SSE lines</span>
+<span class="k">yield</span> <span class="s">f"data: {text}\n\n"</span>   <span class="c"># chunk</span>
+<span class="k">yield</span> <span class="s">"data: [DONE]\n\n"</span>     <span class="c"># sentinel</span>
+
+<span class="c"># Frontend: reads with fetch() body reader, not EventSource</span>
+<span class="c"># (EventSource only supports GET — our /explain is POST)</span>
+<span class="k">const</span> reader = response.body.<span class="f">getReader</span>()
+      </div>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 5 — SVD trains once at startup as a module-level singleton</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The SVD model is created once in <code>collab_filter.py</code> as a module-level object and trained
+        in <code>run.py</code> at startup. Every route just imports the singleton. We never re-instantiate it.
+      </p>
+      <p style="font-size:0.82rem;color:#666;">
+        <strong style="color:#aaa;">Why not train inside the route?</strong> SVD training takes a few seconds.
+        If we trained on every request the app would be unusably slow.
+        The singleton trains once, stays in memory, and serves predictions instantly.
+        Phase 4 will add periodic retraining as real ratings accumulate.
+      </p>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 6 — Switched from Gemini to Groq mid-phase</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The original plan used Google Gemini (gemini-2.0-flash). We hit HTTP 429 errors with
+        <code>limit: 0</code> on every model — meaning the Google Cloud project had zero free tier quota
+        allocated (not exhausted, literally zero). Creating new API keys from the same account didn't help
+        since all keys inherit the project's quota.
+      </p>
+      <p style="font-size:0.82rem;color:#666;">
+        <strong style="color:#aaa;">Groq's free tier:</strong> 30 requests/min, 14,400/day, no credit card needed.
+        Keys from <a href="https://console.groq.com" target="_blank">console.groq.com</a> work immediately.
+        The client code in <code>gemini_client.py</code> kept its original filename since all routes
+        import from it — only the internal implementation changed.
+      </p>
+    </div>
+
+    <div class="flow-box" style="margin-bottom:1rem;">
+      <div class="flow-title">Decision 8 — SVD recommendations intentionally left off the movie detail page</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The watchlist page shows two recommendation signals side by side:
+        <strong style="color:#ccc;">"Recommended For You"</strong> (TF-IDF — content similar to your saved movies)
+        and <strong style="color:#ccc;">"You Might Also Like"</strong> (SVD — what users with similar taste tend to watch).
+        A natural next step would be to add SVD to the movie detail page too — but we deliberately didn't. Here's why.
+      </p>
+
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The SVD model we built is <strong style="color:#ccc;">user-based collaborative filtering</strong>.
+        It answers: <em>"Given this user's ratings, which movies are they most likely to enjoy?"</em>
+        It has no knowledge of the specific movie you are currently viewing. If you added it to the detail page,
+        it would return the <strong style="color:#ccc;">exact same list</strong> whether you're looking at Fight Club or Frozen —
+        completely ignoring the movie context. That would feel random and broken.
+      </p>
+
+      <div class="code-block">
+<span class="c"># What we built — user-based SVD:</span>
+<span class="c">#   Input:  user_id + all candidate movie IDs</span>
+<span class="c">#   Output: top-N movies predicted to score highly FOR THIS USER</span>
+<span class="c">#   → Correct for watchlist page (user-centric context)</span>
+<span class="c">#   → Wrong  for detail page   (movie-centric context)</span>
+
+<span class="c"># What the detail page would need — item-based SVD:</span>
+<span class="c">#   Input:  a specific movie ID</span>
+<span class="c">#   Output: movies that users who liked THIS movie also liked</span>
+<span class="c">#   → Requires item-item collaborative filtering (different model, not built yet)</span>
+      </div>
+
+      <p style="font-size:0.88rem;color:#999;margin-top:0.75rem;margin-bottom:0.5rem;">
+        The detail page already has the right tool for its context — TF-IDF "More Like This" — which
+        finds movies with similar content (title, plot, genre, cast). That's a movie-centric signal.
+        The watchlist page is the right place for user-centric signals.
+      </p>
+
+      <table class="api-table" style="margin-top:0.75rem;">
+        <thead>
+          <tr>
+            <th>Page</th>
+            <th>Context</th>
+            <th>Signal</th>
+            <th>Question it answers</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#f97316;">Detail page</td>
+            <td style="color:#888;">Movie-centric</td>
+            <td style="color:#888;">TF-IDF "More Like This"</td>
+            <td style="color:#888;">What movies are similar to <em>this one</em>?</td>
+          </tr>
+          <tr>
+            <td style="color:#f97316;">Watchlist page</td>
+            <td style="color:#888;">User-centric</td>
+            <td style="color:#888;">TF-IDF "Recommended For You"</td>
+            <td style="color:#888;">What fits the content of <em>my saved movies</em>?</td>
+          </tr>
+          <tr>
+            <td style="color:#f97316;">Watchlist page</td>
+            <td style="color:#888;">User-centric</td>
+            <td style="color:#888;">SVD "You Might Also Like"</td>
+            <td style="color:#888;">What do users with <em>my taste</em> tend to watch?</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="insight" style="margin-top:1rem;">
+        <span class="icon">🔭</span>
+        <p><strong>Phase 4 could add item-item collab filtering on the detail page</strong> — train a second SVD where the input is a movie ID and the output is movies that co-occur in other users' watchlists/ratings. That's a different model from what we have, and it requires enough real user data to be meaningful. For now TF-IDF content filtering covers the detail page well.</p>
+      </div>
+    </div>
+
+    <div class="flow-box">
+      <div class="flow-title">Decision 7 — Star ratings persist to localStorage, not just React state</div>
+      <p style="font-size:0.88rem;color:#999;margin-bottom:0.75rem;">
+        The initial implementation stored ratings only in React state
+        (<code>useState&lt;Record&lt;number, number&gt;&gt;({})</code>).
+        Page refresh wiped them. Fix: initialize state from localStorage and write back on every rating change.
+      </p>
+      <div class="code-block">
+<span class="c"># Before: ratings lost on refresh</span>
+<span class="k">const</span> [ratings, setRatings] = <span class="f">useState</span>({})
+
+<span class="c"># After: initialized from + written back to localStorage</span>
+<span class="k">const</span> [ratings, setRatings] = <span class="f">useState</span>(() => <span class="f">JSON.parse</span>(localStorage.<span class="f">getItem</span>(<span class="s">'moviedux_ratings'</span>) ?? <span class="s">'{}'</span>))
+<span class="c"># On every rating: localStorage.setItem('moviedux_ratings', JSON.stringify(next))</span>
+      </div>
+      <p style="font-size:0.82rem;color:#666;">
+        <strong style="color:#aaa;">Same pattern as the watchlist</strong> — which already used localStorage. Ratings follow the same convention.
+      </p>
+    </div>
+  </section>
+
+  <footer class="page-footer">
+    MovieDux Phase 3 — SVD Collaborative Filtering + Groq AI Chat — May 2026
+  </footer>
+
+</div>
+</body>
+</html>

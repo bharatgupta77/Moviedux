@@ -58,7 +58,6 @@ function transformMovie(raw: TMDBMovie, genreMap: Map<number, string>): Movie {
     posterPath: raw.poster_path ? `${TMDB_IMAGE_BASE}${raw.poster_path}` : '',
     // Take the first 2 genre IDs and join them as a string
     genre: raw.genre_ids
-      .slice(0, 2)
       .map((id) => genreMap.get(id) ?? 'Unknown')
       .join(', '),
     // Round to 1 decimal place
@@ -135,7 +134,13 @@ export async function fetchAllPopularMovies(
     if (onProgress) onProgress(1 + i + batch.length, totalPages);
   }
 
-  return allMovies;
+  // Deduplicate — TMDB can return the same movie on multiple pages
+  const seen = new Set<number>();
+  return allMovies.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
 }
 
 // Get full detail for a single movie by its TMDB id (includes credits)
